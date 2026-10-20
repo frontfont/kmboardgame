@@ -3,25 +3,92 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Brewmaster: Craft Beer Card Game</title>
+<title>Brew &amp; Brawl: Craft Beer Card Game</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;500;600&family=Bungee&family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com/3.4.17"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <style>
-  body{background:radial-gradient(ellipse at top,#4a2c17 0%,#2a170c 55%,#150b05 100%);min-height:100vh;color:#fde7b8;font-family:Georgia,'Sarabun','Noto Sans Thai',serif}
-  .wood{background:repeating-linear-gradient(90deg,#3b2312 0,#3b2312 18px,#34200f 18px,#34200f 20px);border:2px solid #7a4a22;box-shadow:inset 0 0 30px #0008,0 8px 20px #0007}
-  .card{transition:transform .15s}.card:hover{transform:translateY(-6px) rotate(-1deg)}
-  .btn{background:linear-gradient(#f5a623,#c47a0e);color:#2a170c;font-weight:700;border-radius:.75rem;padding:.7rem 1.2rem;box-shadow:0 4px 0 #7a4a0a}
-  .btn:active{transform:translateY(3px);box-shadow:0 1px 0 #7a4a0a}
-  .btn:disabled{opacity:.35;cursor:not-allowed;filter:grayscale(.6)}
-  input{background:#1c0f07;border:2px solid #7a4a22;border-radius:.6rem;padding:.6rem .9rem;color:#fde7b8;width:100%}
-  input:focus{outline:none;border-color:#f5a623}
-  @keyframes pulse2{0%,100%{box-shadow:0 0 0 0 #f5a62399}50%{box-shadow:0 0 0 10px #f5a62300}}
-  .turn{animation:pulse2 1.6s infinite;border-color:#f5a623!important}
+  body{min-height:100vh;color:#fde7b8;font-family:'Sarabun','Noto Sans Thai',system-ui,sans-serif;overflow-x:hidden;background:radial-gradient(900px 500px at 50% -5%,#8a552655,transparent 65%),radial-gradient(ellipse at center,#3a2112 0%,#1d0f06 62%,#0b0502 100%);background-attachment:fixed}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background:repeating-linear-gradient(90deg,#0000 0 118px,#0000002e 118px 120px)}
+  #app{position:relative;z-index:1}
+  .bubble{position:fixed;bottom:-40px;border-radius:50%;pointer-events:none;z-index:0;background:radial-gradient(circle at 30% 30%,#fff9,#f5b53a26 60%,transparent);animation:rise linear infinite}
+  @keyframes rise{to{transform:translateY(-115vh) translateX(20px)}}
+  .logo{font-family:'Bungee','Mitr',sans-serif;font-size:clamp(1.9rem,8vw,3.4rem);line-height:1;letter-spacing:.03em;background:linear-gradient(#fff4c2 10%,#ffc43d 50%,#b4600a);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 3px 0 #5a2f08) drop-shadow(0 7px 0 #2b1405) drop-shadow(0 12px 14px #000b)}
+  .sub{font-family:'Bungee','Mitr',sans-serif;letter-spacing:.25em;font-size:.68rem;color:#e0a85a;margin-top:.7rem}
+  .mug{font-size:3.4rem;animation:float 3s ease-in-out infinite;filter:drop-shadow(0 8px 6px #000a)}
+  .compact .mug,.compact .emblem{display:none}
+  .emblem{position:relative;width:5.5rem;height:4.4rem;margin:0 auto .3rem;animation:float 3s ease-in-out infinite;filter:drop-shadow(0 8px 6px #000a)}
+  .emblem .sw{position:absolute;inset:0;text-align:center;font-size:4.4rem;line-height:1}
+  .emblem .mg{position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);font-size:2.5rem;line-height:1}
+  .vs{text-align:center;font-family:'Bungee',sans-serif;color:#e0a85a;letter-spacing:.3em;font-size:.75rem;margin:-.4rem 0 1rem;text-shadow:0 2px 0 #000a}.compact .logo{font-size:clamp(1.6rem,6vw,2.3rem)}
+  @keyframes float{50%{transform:translateY(-8px) rotate(-4deg)}}
+  .wood{position:relative;border-radius:1.25rem;background:linear-gradient(180deg,#4b2c16,#2c180b);border:3px solid #8a5526;box-shadow:inset 0 2px 0 #ffc77a40,inset 0 -6px 14px #0008,0 10px 0 #1a0d05,0 18px 30px #000a}
+  .wood::after{content:"";position:absolute;inset:6px;border-radius:.9rem;border:1px solid #f5b53a30;pointer-events:none}
+  .turn{border-color:#ffd56a!important;animation:glow 1.6s ease-in-out infinite}
+  @keyframes glow{0%,100%{box-shadow:inset 0 2px 0 #ffc77a40,inset 0 -6px 14px #0008,0 10px 0 #1a0d05,0 0 14px #f5b53a66}50%{box-shadow:inset 0 2px 0 #ffc77a40,inset 0 -6px 14px #0008,0 10px 0 #1a0d05,0 0 34px #f5b53acc}}
+  .btn{font-family:'Mitr',sans-serif;font-weight:500;font-size:1.05rem;color:#2a1306;border-radius:.9rem;padding:.75rem 1.2rem;background:linear-gradient(#ffd56a,#f0a020 55%,#c47a0e);border:2px solid #7a4308;box-shadow:inset 0 2px 0 #fff8,0 5px 0 #7a4308,0 9px 12px #0008;text-shadow:0 1px 0 #fff6;transition:transform .08s,filter .15s}
+  .btn:hover:not(:disabled){filter:brightness(1.1)}
+  .btn:active:not(:disabled){transform:translateY(4px);box-shadow:inset 0 2px 0 #fff8,0 1px 0 #7a4308}
+  .btn:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.7)}
+  .btn.alt{background:linear-gradient(#e9a36b,#b8642c 55%,#8a3f16);color:#fff;border-color:#4d1f08;box-shadow:inset 0 2px 0 #fff5,0 5px 0 #4d1f08,0 9px 12px #0008;text-shadow:0 2px 0 #0006}
+  .abtn{display:flex;flex-direction:column;align-items:center;gap:.1rem;padding:.8rem .3rem;border-radius:1rem;font-family:'Mitr',sans-serif;color:#fff;border:2px solid #0006;box-shadow:inset 0 3px 0 #fff5,inset 0 -6px 10px #0004,0 6px 0 var(--sh),0 12px 14px #000a;text-shadow:0 2px 0 #0007;transition:transform .08s}
+  .abtn .ai{font-size:2rem;filter:drop-shadow(0 3px 2px #0007)}.abtn .at{font-size:1rem;font-weight:500}.abtn .as{font-size:.66rem;opacity:.85}
+  .abtn:hover:not(:disabled){transform:translateY(-3px)}
+  .abtn:active:not(:disabled){transform:translateY(4px);box-shadow:inset 0 3px 0 #fff5,0 2px 0 var(--sh)}
+  .abtn:disabled{filter:grayscale(.85) brightness(.55);cursor:not-allowed}
+  .abtn.draw{--sh:#7a4308;background:linear-gradient(#ffc94d,#e08a10)}
+  .abtn.trade{--sh:#0c4f66;background:linear-gradient(#4cc3e8,#1b7fa8)}
+  .abtn.brew{--sh:#1f5a1a;background:linear-gradient(#8fdc52,#3c9a2a)}
+  .abtn.ready:not(:disabled){animation:ready 1.2s infinite}
+  @keyframes ready{50%{filter:brightness(1.25) drop-shadow(0 0 10px #b6ff7a)}}
+  .inp{font-family:'Mitr','Sarabun',sans-serif;font-size:1.1rem;background:linear-gradient(#150a04,#1f1008);border:2px solid #7a4a22;border-radius:.85rem;padding:.8rem 1rem;color:#ffe7b0;width:100%;box-shadow:inset 0 3px 8px #000b,0 1px 0 #ffc77a22;transition:border-color .15s,box-shadow .15s}
+  .inp::placeholder{color:#b88a55;opacity:.55}
+  .inp:focus{outline:none;border-color:#f5b53a;box-shadow:inset 0 3px 8px #000b,0 0 0 3px #f5b53a33}
+  .inp.code{font-family:'Bungee',sans-serif;font-size:1.5rem;letter-spacing:.5em;text-align:center;text-transform:uppercase;color:#ffc43d;text-shadow:0 2px 0 #5a2f08;padding:.7rem .5rem .7rem 1.1rem}
+  .inp.code::placeholder{font-family:'Mitr',sans-serif;font-size:.95rem;letter-spacing:.3em;text-shadow:none}
+  .lobby{padding:1.9rem 1.6rem 1.6rem}
+  .lbl{display:block;font-family:'Mitr',sans-serif;font-weight:500;font-size:.95rem;color:#ffc43d;margin-bottom:.6rem;letter-spacing:.02em}
+  .or{display:flex;align-items:center;gap:.9rem;margin:1.8rem 0;font-family:'Mitr',sans-serif;font-size:.8rem;color:#c99a5a}
+  .or::before,.or::after{content:"";flex:1;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,#8a5526)}
+  .or::after{background:linear-gradient(270deg,transparent,#8a5526)}
+  .hint{margin-top:1.7rem;padding-top:1.2rem;border-top:1px dashed #8a552666;text-align:center;font-size:.82rem;line-height:1.7;color:#c9a46d}
+  .hand{display:flex;flex-wrap:wrap;gap:20px;justify-content:center;perspective:800px;padding:18px 0 8px;background:radial-gradient(ellipse at 50% 100%,#0009,transparent 70%)}
+  .gwrap{position:relative;width:104px;height:150px;transform-style:preserve-3d;transition:transform .2s}
+  .gwrap:hover{transform:translateY(-10px) rotateX(8deg) rotateZ(-2deg)}
+  .gwrap.sm{width:70px;height:100px}
+  .gwrap.empty{filter:grayscale(1) brightness(.45);opacity:.75}
+  .gcard{position:absolute;inset:0;border-radius:14px;padding:6px;background:linear-gradient(#fff6d6,#e3c585);box-shadow:0 7px 0 #0007,0 14px 18px #000a}
+  .gback{background:linear-gradient(#d9bd80,#b99650)}
+  .face{position:relative;height:100%;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:7px 4px;color:#fff;overflow:hidden;border:2px solid #0004;box-shadow:inset 0 0 14px #0005}
+  .face::before{content:"";position:absolute;inset:-40% -60%;background:linear-gradient(105deg,transparent 40%,#fff6 50%,transparent 60%);transform:translateX(-60%);transition:transform .7s}
+  .gwrap:hover .face::before{transform:translateX(60%)}
+  .gname{font-family:'Mitr',sans-serif;font-weight:500;font-size:.95rem;text-shadow:0 2px 0 #0006}
+  .gicon{font-size:3.1rem;line-height:1;padding:.2rem;border-radius:50%;background:radial-gradient(circle,#fff5,transparent 70%);filter:drop-shadow(0 4px 4px #0008)}
+  .gkey{font-family:'Bungee',sans-serif;font-size:.55rem;letter-spacing:.15em;opacity:.8}
+  .gwrap.sm .gicon{font-size:1.9rem}.gwrap.sm .gname{font-size:.75rem}.gwrap.sm .gkey{display:none}
+  .cnt{position:absolute;top:-12px;right:-12px;z-index:3;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bungee',sans-serif;font-size:1rem;color:#2a1306;background:linear-gradient(#ffd56a,#c47a0e);border:3px solid #2a1306;box-shadow:0 3px 0 #0008}
+  .avatar{flex:none;width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bungee','Mitr',sans-serif;color:#fff;font-size:1.1rem;border:3px solid #ffd56a;box-shadow:0 3px 0 #000a,inset 0 -4px 6px #0005;text-shadow:0 2px 0 #0006}
+  .pips{display:flex;gap:2px;font-size:1.05rem}.pip{filter:grayscale(1) brightness(.45);opacity:.6}.pip.on{filter:none;opacity:1;text-shadow:0 0 10px #ffc43d}
+  .chip{display:inline-flex;align-items:center;gap:.3rem;background:#1a0d05;border:1px solid #8a5526;border-radius:999px;padding:.15rem .7rem;font-size:.9rem;box-shadow:inset 0 2px 4px #000a}
+  .tag{font-family:'Mitr',sans-serif;font-size:.7rem;background:#f5b53a;color:#2a1306;border-radius:999px;padding:.1rem .6rem;animation:blink 1.2s infinite}
+  @keyframes blink{50%{opacity:.55}}
+  .ribbon{font-family:'Mitr',sans-serif;text-align:center;padding:.55rem 2.5rem;margin:0 auto 1.2rem;max-width:26rem;color:#d9b98a;background:linear-gradient(#3b2312,#24130a);clip-path:polygon(0 0,100% 0,calc(100% - 16px) 50%,100% 100%,0 100%,16px 50%)}
+  .ribbon.mine{color:#2a1306;font-weight:600;background:linear-gradient(#ffe08a,#f0a020);animation:blink 1.4s infinite}
+  .recipe{display:flex;align-items:center;justify-content:center;gap:.45rem;color:#c99a5a}
+  .rslot{position:relative;width:38px;height:38px;border-radius:.6rem;background:#1a0d05;border:2px solid #5a3a1c;display:flex;align-items:center;justify-content:center;font-size:1.3rem;opacity:.5;filter:grayscale(.8)}
+  .rslot.ok{opacity:1;filter:none;border-color:#ffd56a;box-shadow:0 0 10px #f5b53a88}
+  .rslot.ok:not(.brewout)::after{content:"✓";position:absolute;right:-6px;bottom:-6px;width:16px;height:16px;border-radius:50%;background:#3fb950;color:#fff;font-size:.65rem;display:flex;align-items:center;justify-content:center;border:2px solid #1a0d05}
+  .conf{position:fixed;top:-20px;width:9px;height:15px;z-index:45;pointer-events:none;animation:fall 3.2s linear infinite}
+  @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+  @media (prefers-reduced-motion:reduce){.bubble,.mug,.emblem,.turn,.tag,.ready,.conf,.ribbon{animation:none!important}}
 </style>
 </head>
 <body style="padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)">
 <div id="app" class="max-w-4xl mx-auto p-4"></div>
 <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 hidden bg-black/80 border border-amber-500 px-4 py-2 rounded-xl z-50"></div>
+<button id="musicBtn" title="เปิด/ปิดเพลง" aria-label="เปิด/ปิดเพลง" class="wood fixed right-4 z-50 w-12 h-12 rounded-full text-2xl flex items-center justify-center" style="top:calc(env(safe-area-inset-top,0px) + .75rem)">🔊</button>
 
 <script>
 const SB_URL='https://mixnoevgnzcvwxehsnym.supabase.co';
@@ -31,7 +98,7 @@ const ING={
   water:{th:'น้ำ',e:'💧',c:'from-sky-400 to-sky-800'},
   malt:{th:'มอลต์',e:'🌾',c:'from-amber-400 to-amber-800'},
   hops:{th:'ฮอปส์',e:'🌿',c:'from-lime-400 to-green-800'},
-  yeast:{th:'ยีสต์',e:'🫧',c:'from-rose-300 to-orange-700'}
+  yeast:{th:'ยีสต์',e:'🦠',c:'from-rose-300 to-orange-700'}
 };
 const KEYS=Object.keys(ING), WIN=3, MAXP=4;
 let me=null, room=null, players=[], chan=null, tradeOpen=false, give={water:0,malt:0,hops:0,yeast:0}, want=null, busy=false;
@@ -147,70 +214,79 @@ async function rematch(){
 }
 
 /* ---------- UI ---------- */
-function cardHTML(k,n,small){
-  const i=ING[k];
-  return `<div class="card rounded-2xl bg-gradient-to-b ${i.c} border-2 border-amber-200/60 shadow-xl text-center ${small?'w-20 py-2':'w-28 py-4'}" style="color:#fff">
-    <div class="${small?'text-3xl':'text-5xl'}">${i.e}</div>
-    <div class="font-bold ${small?'text-xs':'text-base'}">${i.th}</div>
-    <div class="${small?'text-lg':'text-2xl'} font-black">×${n}</div></div>`;
+const AV=['#d6453d','#2f8fe0','#3aa655','#a45bd6'];
+function cardHTML(k,n,mode){
+  const i=ING[k], sm=mode==='sm';
+  const b1=!sm&&n>=2?'<div class="gcard gback" style="transform:translate(7px,6px) rotate(4deg)"></div>':'';
+  const b2=!sm&&n>=4?'<div class="gcard gback" style="transform:translate(-7px,5px) rotate(-4deg)"></div>':'';
+  return `<div class="gwrap ${sm?'sm':''} ${!sm&&n===0?'empty':''}">${b2}${b1}
+    <div class="gcard">${sm?'':`<div class="cnt">${n}</div>`}
+      <div class="face bg-gradient-to-b ${i.c}"><div class="gname">${i.th}</div><div class="gicon">${i.e}</div><div class="gkey">${k}</div></div></div></div>`;
 }
+function av(pl){return `<div class="avatar" style="background:${AV[pl.seat%4]}">${esc([...pl.name][0]||'?').toUpperCase()}</div>`}
+const pips=n=>Array.from({length:WIN},(_,i)=>`<span class="pip ${i<n?'on':''}">🍺</span>`).join('');
+function copyCode(){navigator.clipboard?.writeText(room.code).then(()=>toast('คัดลอกรหัสห้องแล้ว')).catch(()=>{})}
+for(let i=0;i<16;i++){const b=document.createElement('div');b.className='bubble';const z=6+Math.random()*18;b.style.cssText=`left:${Math.random()*100}%;width:${z}px;height:${z}px;animation-duration:${8+Math.random()*10}s;animation-delay:-${Math.random()*14}s`;document.body.appendChild(b)}
 function render(){
   const a=$('#app');
   if(!room) return a.innerHTML=lobbyHTML();
   if(room.status==='waiting') return a.innerHTML=waitingHTML();
   a.innerHTML=boardHTML();
 }
-function head(){return `<h1 class="text-center text-4xl sm:text-5xl font-black text-amber-400 drop-shadow mb-1">🍺 Brewmaster</h1>
-  <p class="text-center text-amber-200/70 mb-6 tracking-widest text-sm">CRAFT BEER CARD GAME</p>`}
+function head(c){return `<div class="text-center ${c?'compact mb-3':'mb-5 pt-2'}"><div class="emblem"><span class="sw">⚔️</span><span class="mg">🍺</span></div><h1 class="logo">BREW &amp; BRAWL</h1><div class="sub">— CRAFT BEER CARD BRAWL —</div></div>`}
 function lobbyHTML(){return head()+`
-  <div class="wood rounded-2xl p-6 max-w-md mx-auto space-y-4">
-    <div><label class="text-sm text-amber-300">ชื่อผู้เล่น</label><input id="name" maxlength="16" placeholder="เช่น Brewer Bob"></div>
-    <button class="btn w-full" onclick="createRoom()">🏠 สร้างห้องใหม่</button>
-    <div class="text-center text-amber-300/60 text-sm">— หรือ —</div>
-    <input id="code" maxlength="5" placeholder="Room Code" class="uppercase tracking-[.4em] text-center">
-    <button class="btn w-full" onclick="joinRoom()">🚪 เข้าห้อง</button>
-    <p class="text-xs text-amber-200/50 text-center">รวบรวมน้ำ มอลต์ ฮอปส์ ยีสต์ แล้วปรุงเบียร์ให้ครบ ${WIN} แต้มเพื่อชนะ</p>
+  <div class="flex justify-center mb-8 pt-1">${KEYS.map((k,i)=>`<div style="margin:0 -7px;transform:rotate(${(i-1.5)*8}deg) translateY(${Math.abs(i-1.5)*7}px)">${cardHTML(k,0,'sm')}</div>`).join('')}</div>
+  <div class="wood lobby max-w-md mx-auto">
+    <div>
+      <label class="lbl" for="name">👤 ชื่อผู้เล่น</label>
+      <input id="name" class="inp" maxlength="16" placeholder="เช่น Brewer Bob" autocomplete="off">
+      <button class="btn w-full" style="margin-top:1.1rem" onclick="createRoom()">🏠 สร้างห้องใหม่</button>
+    </div>
+    <div class="or"><span>หรือเข้าร่วมห้อง</span></div>
+    <div>
+      <label class="lbl" for="code">🔑 รหัสห้อง</label>
+      <input id="code" class="inp code" maxlength="5" placeholder="ROOM CODE" autocomplete="off" autocapitalize="characters" spellcheck="false">
+      <button class="btn alt w-full" style="margin-top:1.1rem" onclick="joinRoom()">🚪 เข้าห้อง</button>
+    </div>
+    <p class="hint">รวบรวม 💧 น้ำ · 🌾 มอลต์ · 🌿 ฮอปส์ · 🦠 ยีสต์<br>ปรุงเบียร์ให้ครบ ${WIN} แต้ม แล้วเป็นแชมป์ประลอง ⚔️</p>
   </div>`}
-function playerList(){return sorted().map(p=>`<div class="flex justify-between bg-black/30 rounded-lg px-3 py-2"><span>${p.seat===0?'👑 ':'🍻 '}${esc(p.name)}${p.id===me.id?' <span class="text-amber-400">(คุณ)</span>':''}</span></div>`).join('')}
+function playerList(){return sorted().map(p=>`<div class="flex items-center gap-3 bg-black/30 rounded-xl px-3 py-2 border border-amber-900">${av(p)}<span class="flex-1 text-left font-bold truncate">${esc(p.name)}${p.id===me.id?' <span class="text-amber-400 text-sm">(คุณ)</span>':''}</span>${p.seat===0?'<span class="tag" style="animation:none">👑 โฮสต์</span>':''}</div>`).join('')}
 function waitingHTML(){
   const host=sorted()[0]?.id===me.id;
-  return head()+`<div class="wood rounded-2xl p-6 max-w-md mx-auto space-y-4 text-center">
-    <div class="text-sm text-amber-300">Room Code</div>
-    <div class="text-5xl font-black tracking-[.3em] text-amber-400">${room.code}</div>
-    <div class="space-y-2 text-left">${playerList()}</div>
+  return head()+`<div class="wood p-6 max-w-md mx-auto space-y-4 text-center">
+    <div class="text-sm text-amber-300">ROOM CODE · แตะเพื่อคัดลอก</div>
+    <button onclick="copyCode()" class="logo" style="font-size:3rem;letter-spacing:.2em;display:block;margin:0 auto">${room.code}</button>
+    <div class="space-y-2">${playerList()}</div>
     <div class="text-sm text-amber-200/60">${players.length}/${MAXP} คน</div>
     ${host?`<button class="btn w-full" onclick="startGame()" ${players.length<2?'disabled':''}>▶ เริ่มเกม</button>`:'<div class="text-amber-300 animate-pulse">รอเจ้าของห้องเริ่มเกม…</div>'}
     <button class="text-sm underline text-amber-200/60" onclick="leave()">ออกจากห้อง</button></div>`}
 function boardHTML(){
-  const cur=current(), p=mine(), t=myTurn();
-  const others=sorted().filter(x=>x.id!==me.id).map(o=>`
-    <div class="wood rounded-xl p-3 ${cur?.id===o.id?'turn':''}">
-      <div class="font-bold flex justify-between"><span>${esc(o.name)}</span><span class="text-amber-400">🍺 ${o.beer_points}/${WIN}</span></div>
-      <div class="flex gap-3 text-sm mt-1">${KEYS.map(k=>`<span>${ING[k].e}${o[k]}</span>`).join('')}</div>
-    </div>`).join('');
-  const canBrew=KEYS.every(k=>p[k]>=1), total=KEYS.reduce((s,k)=>s+p[k],0);
-  const winner=players.find(x=>x.id===room.winner_id);
-  const host=sorted()[0]?.id===me.id;
-  return head()+`
-  <div class="flex justify-between text-xs text-amber-200/60 mb-2"><span>ห้อง ${room.code}</span><button class="underline" onclick="leave()">ออก</button></div>
-  <div class="text-center mb-4 text-lg ${t?'text-amber-300 font-bold':'text-amber-100/70'}">${t?'⭐ ถึงเทิร์นของคุณ!':`รอ ${esc(cur?.name||'')} เล่น…`}</div>
-  <div class="grid sm:grid-cols-${Math.min(3,Math.max(1,players.length-1))} gap-3 mb-6">${others}</div>
-  <div class="wood rounded-2xl p-5 ${t?'turn':''}">
-    <div class="flex justify-between mb-3"><span class="font-bold text-lg">🎒 กระเป๋าของ ${esc(p.name)}</span><span class="text-amber-400 font-black">🍺 ${p.beer_points}/${WIN} แต้ม</span></div>
-    <div class="flex flex-wrap gap-3 justify-center mb-5">${KEYS.map(k=>cardHTML(k,p[k])).join('')}</div>
-    <div class="grid grid-cols-3 gap-3">
-      <button class="btn" ${t&&!busy?'':'disabled'} onclick="drawCard()">🃏<br>จั่วการ์ด</button>
-      <button class="btn" ${t&&!busy&&total>=2?'':'disabled'} onclick="openTrade()">🔄<br>แลกเปลี่ยน</button>
-      <button class="btn" ${t&&!busy&&canBrew?'':'disabled'} onclick="brew()">🍻<br>ปรุงเบียร์</button>
-    </div>
-    <p class="text-xs text-center text-amber-200/50 mt-3">แลก: สละ 2 ชิ้น รับ 1 ชิ้นที่ต้องการ · ปรุง: ใช้อย่างละ 1</p>
-  </div>
+  const s=sorted(), cur=current(), p=mine(), t=myTurn();
+  const canBrew=KEYS.every(k=>p[k]>=1), total=KEYS.reduce((a,k)=>a+p[k],0);
+  const winner=players.find(x=>x.id===room.winner_id), host=s[0]?.id===me.id;
+  const others=s.filter(x=>x.id!==me.id).map(o=>`<div class="wood p-3 ${cur?.id===o.id?'turn':''}">
+    <div class="flex items-center gap-3">${av(o)}<div class="flex-1 min-w-0"><div class="font-bold truncate">${esc(o.name)}</div><div class="pips">${pips(o.beer_points)}</div></div>${cur?.id===o.id?'<span class="tag">⚔️ กำลังเล่น</span>':''}</div>
+    <div class="flex flex-wrap gap-2 mt-2">${KEYS.map(k=>`<span class="chip">${ING[k].e}<b>${o[k]}</b></span>`).join('')}</div></div>`).join('');
+  const rec=`<div class="recipe">${KEYS.map(k=>`<span class="rslot ${p[k]>=1?'ok':''}">${ING[k].e}</span>`).join('<i>+</i>')}<i>➜</i><span class="rslot brewout ${canBrew?'ok':''}">🍺</span></div>`;
+  const dis=ok=>t&&!busy&&ok?'':'disabled';
+  const confetti=room.status==='finished'?Array.from({length:36},(_,i)=>`<span class="conf" style="left:${Math.random()*100}%;background:${['#ffc43d','#ff6b4a','#6fdc5a','#4cc3e8','#d98cff'][i%5]};animation-delay:${(Math.random()*3).toFixed(2)}s;animation-duration:${(2.5+Math.random()*2).toFixed(2)}s"></span>`).join(''):'';
+  return head(true)+`
+  <div class="flex justify-between items-center mb-3 pr-14">
+    <button class="chip" onclick="copyCode()">🔑 ${room.code} ⧉</button>
+    <button class="chip" onclick="leave()">🚪 ออก</button></div>
+  <div class="ribbon ${t?'mine':''}">${t?'⚔️ ถึงเทิร์นของคุณ! ลุยเลย!':'⏳ รอ '+esc(cur?.name||'')+' เล่น…'}</div>
+  ${others?`<div class="grid gap-3 mb-5" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">${others}</div><div class="vs">⚔️ VS ⚔️</div>`:''}
+  <div class="wood p-4 ${t?'turn':''}">
+    <div class="flex items-center gap-3 mb-3">${av(p)}<div class="flex-1 min-w-0"><div class="font-bold text-lg truncate">${esc(p.name)}</div><div class="pips">${pips(p.beer_points)}</div></div><div class="text-right text-xs text-amber-200/60">${total} การ์ด</div></div>
+    ${rec}
+    <div class="hand">${KEYS.map(k=>cardHTML(k,p[k])).join('')}</div>
+    <div class="grid grid-cols-3 gap-3 mt-6">
+      <button class="abtn draw" ${dis(true)} onclick="drawCard()"><span class="ai">🃏</span><span class="at">จั่วการ์ด</span><span class="as">สุ่ม +1 ชิ้น</span></button>
+      <button class="abtn trade" ${dis(total>=2)} onclick="openTrade()"><span class="ai">🔄</span><span class="at">แลกเปลี่ยน</span><span class="as">2 ชิ้น → 1 ชิ้น</span></button>
+      <button class="abtn brew ${t&&canBrew?'ready':''}" ${dis(canBrew)} onclick="brew()"><span class="ai">🍻</span><span class="at">ปรุงเบียร์</span><span class="as">อย่างละ 1 → +1 แต้ม</span></button>
+    </div></div>
   ${tradeOpen&&t?tradeHTML(p):''}
-  ${room.status==='finished'?`<div class="fixed inset-0 bg-black/80 flex items-center justify-center z-40 p-4"><div class="wood rounded-2xl p-8 text-center max-w-sm">
-    <div class="text-6xl mb-2">🏆</div><div class="text-3xl font-black text-amber-400">${esc(winner?.name||'?')} ชนะ!</div>
-    <p class="my-3">เป็น Brewmaster ตัวจริง ปรุงเบียร์ครบ ${WIN} แต้ม 🍺</p>
-    ${host?'<button class="btn w-full" onclick="rematch()">เล่นอีกรอบ</button>':'<div class="text-amber-300/70 text-sm">รอเจ้าของห้องเริ่มรอบใหม่</div>'}
-    <button class="underline text-sm mt-3 text-amber-200/60" onclick="leave()">ออกจากห้อง</button></div></div>`:''}`;
+  ${room.status==='finished'?`${confetti}<div class="fixed inset-0 bg-black/80 flex items-center justify-center z-40 p-4"><div class="wood p-8 text-center max-w-sm"><div class="mug">🏆</div><div class="logo" style="font-size:1.9rem;margin:.4rem 0">${esc(winner?.name||'?')} WINS!</div><p class="my-3">แชมป์ประลองเบียร์ ปรุงครบ ${WIN} แต้ม 🍺⚔️</p>${host?'<button class="btn w-full" onclick="rematch()">🔁 เล่นอีกรอบ</button>':'<div class="text-amber-300/70 text-sm">รอเจ้าของห้องเริ่มรอบใหม่</div>'}<button class="underline text-sm mt-3 text-amber-200/60" onclick="leave()">ออกจากห้อง</button></div></div>`:''}`;
 }
 function tradeHTML(p){
   const tot=KEYS.reduce((s,k)=>s+give[k],0);
@@ -225,6 +301,65 @@ function tradeHTML(p){
     <div class="flex gap-2"><button class="btn flex-1" ${tot===2&&want?'':'disabled'} onclick="doTrade()">ยืนยันแลก</button>
     <button class="flex-1 rounded-xl border border-amber-700" onclick="tradeOpen=false;render()">ยกเลิก</button></div></div></div>`;
 }
+/* ---------- 8-bit music (synthesized, original tune) ---------- */
+const Music=(()=>{
+  let ctx,master,noiseBuf,step=0,next=0,timer;
+  let enabled=true; try{enabled=localStorage.getItem('bw_music')!=='off'}catch(e){}
+  const btn=document.getElementById('musicBtn'), STEP=60/150/2; // 150 BPM, eighth notes
+  const hz=m=>440*Math.pow(2,(m-69)/12);
+  // 4 bars (C - Am - F - G), 8 eighth-notes per bar; 0 = rest
+  const MEL=[72,76,79,76,72,76,79,84, 81,76,72,76,81,79,76,0, 77,81,84,81,77,79,81,77, 79,83,86,83,79,74,79,0];
+  const BASS=[[36,43],[45,40],[41,48],[43,50]];
+  function tone(type,f,t,d,v){
+    const o=ctx.createOscillator(),g=ctx.createGain();
+    o.type=type;o.frequency.setValueAtTime(f,t);
+    g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(0.0001,t+d);
+    o.connect(g);g.connect(master);o.start(t);o.stop(t+d+0.02);
+  }
+  function hat(t,v){
+    const s=ctx.createBufferSource(),g=ctx.createGain();
+    s.buffer=noiseBuf;g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(0.0001,t+0.04);
+    s.connect(g);g.connect(master);s.start(t);s.stop(t+0.05);
+  }
+  function kick(t){
+    const o=ctx.createOscillator(),g=ctx.createGain();
+    o.frequency.setValueAtTime(140,t);o.frequency.exponentialRampToValueAtTime(40,t+0.1);
+    g.gain.setValueAtTime(0.5,t);g.gain.exponentialRampToValueAtTime(0.0001,t+0.12);
+    o.connect(g);g.connect(master);o.start(t);o.stop(t+0.15);
+  }
+  function schedule(){
+    while(next<ctx.currentTime+0.25){
+      const s=step%32, bar=s>>3, i=s&7, t=next;
+      if(MEL[s]) tone('square',hz(MEL[s]),t,STEP*0.85,0.16);
+      const b=BASS[bar]; if(i%2===0) tone('triangle',hz(b[(i/2)%2]),t,STEP*1.7,0.32);
+      if(i===0||i===4) kick(t);
+      hat(t,i%2?0.07:0.035);
+      next+=STEP;step++;
+    }
+  }
+  function init(){
+    if(ctx) return;
+    const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
+    ctx=new AC();master=ctx.createGain();master.gain.value=0.35;master.connect(ctx.destination);
+    noiseBuf=ctx.createBuffer(1,ctx.sampleRate*0.1,ctx.sampleRate);
+    const d=noiseBuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+    next=ctx.currentTime+0.1;timer=setInterval(schedule,50);
+  }
+  function apply(){
+    btn.textContent=enabled?'🔊':'🔇';
+    if(ctx) enabled?ctx.resume():ctx.suspend();
+  }
+  // browsers need a user gesture before audio can start
+  document.addEventListener('pointerdown',()=>{ if(enabled&&!ctx){init();apply()} });
+  btn.addEventListener('click',()=>{
+    enabled=!enabled;
+    try{localStorage.setItem('bw_music',enabled?'on':'off')}catch(e){}
+    if(enabled&&!ctx) init();
+    apply();
+  });
+  btn.textContent=enabled?'🔊':'🔇';
+})();
+
 restore();
 </script>
 </body>
