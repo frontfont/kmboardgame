@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1d0f06">
+<meta name="color-scheme" content="dark">
 <title>Brew &amp; Brawl: Craft Beer Card Game</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -116,6 +118,68 @@
   .flyc{position:fixed;z-index:60;width:56px;height:78px;border-radius:10px;background:linear-gradient(#fff6d6,#e3c585);display:flex;align-items:center;justify-content:center;font-size:2rem;box-shadow:0 8px 16px #000a;pointer-events:none}
   .plus1{position:fixed;z-index:60;font-family:'Bungee',sans-serif;font-size:1.3rem;color:#ffd56a;text-shadow:0 2px 0 #5a2f08,0 0 12px #f5b53a;pointer-events:none}
   .flash{position:fixed;inset:0;z-index:35;pointer-events:none;background:radial-gradient(ellipse at center,transparent 40%,#d6453d99)}
+  .acards{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+  .acard{position:relative;width:104px;min-height:138px;padding:.5rem .45rem;border-radius:12px;display:flex;flex-direction:column;align-items:center;gap:.15rem;text-align:center;color:#2a1306;background:linear-gradient(#ffe9b0,#e6c06a);border:2px solid #8a5526;box-shadow:inset 0 2px 0 #fff8,0 5px 0 #5a3a1c,0 10px 12px #000a;transition:transform .12s}
+  .acard:hover:not(:disabled){transform:translateY(-6px) rotate(-1.5deg)}
+  .acard:disabled{filter:grayscale(.85) brightness(.6);cursor:not-allowed}
+  .acard.rare{background:linear-gradient(#f3d9ff,#b98be8);border-color:#6a2fb0;box-shadow:inset 0 2px 0 #fff9,0 5px 0 #3b1a66,0 0 16px #b98be888,0 10px 12px #000a}
+  .acard .ar{font-family:'Bungee',sans-serif;font-size:.5rem;letter-spacing:.15em;opacity:.7}
+  .acard .ai{font-size:2rem;line-height:1.1}
+  .acard .an{font-family:'Mitr',sans-serif;font-weight:600;font-size:.88rem;line-height:1.2}
+  .acard .ad{font-size:.66rem;line-height:1.3;opacity:.85}
+  .fxbar{max-width:34rem;margin:-.3rem auto 1rem;padding:.5rem 1rem;border-radius:.8rem;text-align:center;font-size:.82rem;line-height:1.5;color:#f1e0ff;background:linear-gradient(#4a2a78,#2e1850);border:2px solid #9a6be0;box-shadow:inset 0 2px 0 #fff3}
+  .logi.card{color:#d9b6ff}
+  /* touch: ไม่ซูมเมื่อแตะ 2 ที (ยังซูมด้วยการ์ดนิ้วถ่างได้) */
+  html{touch-action:manipulation;-webkit-text-size-adjust:100%}
+  body{-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;min-height:100dvh}
+  button,.gwrap,.acard,.abtn,.chip{touch-action:manipulation}
+  input{-webkit-user-select:text;user-select:text}
+  .fixed.inset-0{overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+  .fixed.inset-0>*{margin:auto}
+  .oppgrid{display:grid;gap:.75rem;margin-bottom:1.25rem;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+  .actbar{margin-top:1.5rem}
+  .logh{width:100%;display:flex;justify-content:space-between;align-items:center;text-align:left}
+  /* มือถือ: จัดหน้าให้กระชับ เห็นครบในจอเดียว */
+  @media (max-width:640px){
+    #app{padding:.65rem .65rem 1rem}
+    .logo{font-size:clamp(1.7rem,9vw,2.4rem)}
+    .compact .logo{font-size:1.45rem}
+    .sub{display:none}
+    .emblem{width:4rem;height:3.2rem}.emblem .sw{font-size:3.2rem}.emblem .mg{font-size:1.9rem}
+    .wood{border-width:2px;border-radius:1rem;box-shadow:inset 0 2px 0 #ffc77a40,inset 0 -4px 10px #0008,0 6px 0 #1a0d05,0 10px 18px #000a}
+    .wood.p-4,.wood.p-3{padding:.7rem}
+    .wood.p-5,.wood.p-6,.wood.p-8{padding:1rem}
+    .lobby{padding:1.3rem 1.1rem 1.2rem}
+    .oppgrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem;margin-bottom:.8rem}
+    .oppgrid .wood{padding:.5rem .6rem}
+    .oppgrid .avatar{width:32px;height:32px;font-size:.9rem;border-width:2px}
+    .oppgrid .chip{padding:.05rem .4rem;font-size:.72rem}
+    .oppgrid .pips{font-size:.85rem}
+    .oppgrid .font-bold{font-size:.85rem}
+    .oppgrid .tag{display:none}
+    .kick{bottom:.35rem;right:.45rem;font-size:.62rem;padding:.05rem .5rem}
+    .vs{margin:-.2rem 0 .6rem}
+    .ribbon{padding:.35rem 1.6rem;margin-bottom:.6rem;font-size:.88rem}
+    .timer{margin:-.2rem auto .6rem;font-size:.72rem}.timer span{min-width:4.8rem}
+    .hostbar{margin:-.2rem 0 .6rem}
+    .evbar,.fxbar{margin:-.2rem auto .6rem;padding:.4rem .7rem;font-size:.75rem}
+    .recipe{gap:.3rem}.rslot{width:30px;height:30px;font-size:1.05rem;border-radius:.5rem}
+    .hand{flex-wrap:nowrap;gap:8px;padding:12px 0 4px}
+    .hand .gwrap{width:calc(25% - 6px);height:auto;aspect-ratio:104/150}
+    .hand .gcard{padding:4px;border-radius:10px}
+    .hand .face{padding:4px 2px;border-radius:7px}
+    .hand .gname{font-size:.68rem}.hand .gicon{font-size:1.8rem}.hand .gkey{display:none}
+    .hand .cnt{width:26px;height:26px;font-size:.78rem;top:-8px;right:-6px;border-width:2px}
+    .acards{flex-wrap:nowrap;gap:8px}
+    .acard{width:calc(33.333% - 6px);min-height:0;padding:.4rem .3rem;border-radius:10px}
+    .acard .ai{font-size:1.5rem}.acard .an{font-size:.72rem}.acard .ad{font-size:.58rem}.acard .ar{font-size:.45rem}
+    .actbar{position:sticky;bottom:calc(env(safe-area-inset-bottom,0px) + 4px);z-index:20;margin-top:.9rem;padding:.5rem;border-radius:1rem;background:linear-gradient(#3b2312ee,#24130aee);border:2px solid #8a5526;box-shadow:0 -6px 16px #000a;backdrop-filter:blur(4px)}
+    .actbar.grid{gap:.5rem}
+    .abtn{padding:.55rem .2rem;border-radius:.8rem}.abtn .ai{font-size:1.5rem}.abtn .at{font-size:.82rem}.abtn .as{font-size:.55rem;text-align:center}
+    .logbox{margin-top:.9rem;padding:.55rem .7rem}.logl{max-height:6.5rem}
+    .pickc{width:64px}
+    #musicBtn{width:2.5rem;height:2.5rem;font-size:1.2rem}
+  }
   @media (prefers-reduced-motion:reduce){.bubble,.mug,.emblem,.turn,.tag,.ready,.conf,.ribbon{animation:none!important}}
 </style>
 </head>
@@ -223,7 +287,8 @@ function subscribe(){
 const nextTurn=()=>(room.current_turn+1)%sorted().length;
 async function startGame(){
   if(players.length<2) return toast('ต้องมีผู้เล่นอย่างน้อย 2 คน');
-  await db.from('rooms').update({status:'playing',current_turn:0,winner_id:null,turn_count:0,event:null,event_key:null,event_round:0,event_info:null,turn_deadline:Date.now()+TURN_SECS*1000}).eq('id',room.id);
+  await Promise.all(players.map(x=>db.from('players').update({cards:[pickCard(),pickCard(),pickCard()]}).eq('id',x.id)));
+  await db.from('rooms').update({status:'playing',current_turn:0,winner_id:null,turn_count:0,event:null,event_key:null,event_round:0,event_info:null,turn_deadline:Date.now()+TURN_SECS*1000,card_used_turn:-1,turn_fx:[],next_event:rollEvent()}).eq('id',room.id);
 }
 async function act(fn){
   if(busy||!myTurn()||anyPending()) return; busy=true;
@@ -262,9 +327,13 @@ const randCard=x=>{const bag=KEYS.flatMap(k=>Array(x[k]).fill(k));return bag.len
 const twoRandom=ps=>[...ps].sort(()=>Math.random()-.5).slice(0,2);
 const names=l=>l.map(x=>x.name).join(', ');
 
-// สุ่ม Event: สลับกระเป๋า 10% / ที่เหลือเท่ากัน (ข้าม Event ที่ใช้ไม่ได้ในสถานการณ์นั้น)
-function pickEvent(ps){
-  if(ps.length>=2&&Math.random()<RARE_CHANCE) return 'swapbag';
+// สุ่ม Event (สลับกระเป๋า 5% / ที่เหลือเท่ากัน) — สุ่มไว้ล่วงหน้าเก็บใน rooms.next_event เพื่อให้การ์ดส่องอนาคตดูได้
+function rollEvent(){
+  if(Math.random()<RARE_CHANCE) return 'swapbag';
+  return rnd(Object.keys(EVENTS).filter(k=>k!=='swapbag'));
+}
+// Event ที่ใช้ไม่ได้ในสถานการณ์นั้น (เช่น ไม่มีใครมีมอลต์) จะถูกสุ่มใหม่
+function eligible(ev,ps){
   const mxP=Math.max(...ps.map(x=>x.beer_points));
   const ok={
     discard:ps.some(x=>tot(x)>0), discarddraw:ps.some(x=>tot(x)>0),
@@ -272,7 +341,12 @@ function pickEvent(ps){
     inspector:ps.some(x=>tot(x)>5), duel:ps.length>=2,
     brawl:mxP>=1&&ps.some(x=>x.beer_points===mxP&&tot(x)>0)
   };
-  return rnd(Object.keys(EVENTS).filter(k=>k!=='swapbag'&&ok[k]!==false));
+  return ev==='swapbag'?ps.length>=2:ok[ev]!==false;
+}
+function pickEvent(ps,want){
+  if(want&&EVENTS[want]&&eligible(want,ps)) return want;
+  for(let i=0;i<40;i++){const e=rollEvent(); if(eligible(e,ps)) return e}
+  return 'notrade';
 }
 // ทำผลของ Event ที่เกิดทันที แล้วคืนข้อความสรุปให้แสดงในป๊อปอัป
 async function runEvent(ev,ps){
@@ -310,19 +384,28 @@ async function runEvent(ev,ps){
   return null; // notrade / extrabrew / hopsshort ใช้ผลตลอดรอบ
 }
 const TURN_SECS=45; // เวลาต่อเทิร์น (วินาที)
+let cardTarget=null,peekMemo=null,peekShow=false;
+let logOpen=!matchMedia('(max-width:640px)').matches;
 let logs=[],soundedId=0,lastEvKey,onlineIds=new Set(),kickArm=null,fx=[],wasMine=false,autoBusy=false,autoFor=-1,lastTick=0;
 const BAD=['notrade','discard','extrabrew','discarddraw','moldmalt','hopsshort','brawl','duel','thief','inspector','swapbag'];
 const isHost=()=>!!me&&sorted()[0]?.id===me.id;
 const logEv=(kind,msg)=>db.from('game_log').insert({room_id:room.id,actor:me.id,kind,msg}).then(()=>{},()=>{});
-function onLog(r){Music.sfx({draw:'draw',trade:'trade',brew:'brew',event:'event',win:'win',discard:'discard',skip:'skip',timeout:'skip',kick:'skip'}[r.kind]||'tick')}
+function onLog(r){Music.sfx({draw:'draw',trade:'trade',brew:'brew',event:'event',win:'win',discard:'discard',skip:'skip',timeout:'skip',kick:'skip',card:'card'}[r.kind]||'tick')}
 const setTurn=async(patch={})=>{
+  const fxl=room.turn_fx||[];
+  if(fxl.includes('double')){ // การ์ดเทิร์นซ้อน: ไม่เลื่อนเทิร์น ให้เล่น Action หลักอีกรอบ
+    const {data:ok,error}=await db.from('rooms').update({turn_fx:fxl.filter(x=>x!=='double'),turn_deadline:Date.now()+TURN_SECS*1000,...patch}).eq('id',room.id).eq('turn_count',room.turn_count||0).select('id');
+    if(error) throw error;
+    if(ok?.length) logEv('card','⏩ เทิร์นซ้อน! ได้เล่น Action หลักต่ออีก 1 รอบ');
+    return !!ok?.length;
+  }
   const n=sorted().length, tc=(room.turn_count||0)+1;
-  const u={current_turn:nextTurn(),turn_count:tc,turn_deadline:Date.now()+TURN_SECS*1000,...patch};
+  const u={current_turn:nextTurn(),turn_count:tc,turn_deadline:Date.now()+TURN_SECS*1000,turn_fx:[],...patch};
   let evMsg=null;
   if(tc%n===0&&EV_ROUNDS.includes(tc/n)){
     const {data}=await db.from('players').select().eq('room_id',room.id), ps=(data||[]).filter(x=>!x.kicked);
-    const ev=pickEvent(ps), info=await runEvent(ev,ps);
-    Object.assign(u,{event:ev,event_key:Math.random().toString(36).slice(2,9),event_round:tc/n+1,event_info:info});
+    const ev=pickEvent(ps,room.next_event), info=await runEvent(ev,ps);
+    Object.assign(u,{event:ev,event_key:Math.random().toString(36).slice(2,9),event_round:tc/n+1,event_info:info,next_event:rollEvent()});
     evMsg=`${EVENTS[ev].icon} Event: ${EVENTS[ev].title}${info?' — '+info:''}`;
   }
   // เงื่อนไข turn_count กันสองเครื่องเลื่อนเทิร์นซ้อนกัน
@@ -433,6 +516,95 @@ async function kickPlayer(id){
   await load(); render();
 }
 
+/* ---------- Action Cards ----------
+   เพิ่มการ์ดใหม่: เพิ่มรายการใน CARDS
+   w = น้ำหนักโอกาสออก (รวมกัน 100 จะอ่านเป็น % ได้เลย) · rare = ป้าย RARE · target = ต้องเลือกผู้เล่นเป้าหมาย (pool กรองเป้าหมาย)
+   can(p) = คืน null ถ้าใช้ได้ หรือข้อความเหตุผลที่ใช้ไม่ได้ · use({p,t}) = ทำผล แล้วคืนข้อความที่จะลงบันทึก (หรือ null)
+   กติกา: ใช้ได้ 1 ใบ/เทิร์น ฟรี ก่อนทำ Action หลัก — ผลระยะเทิร์นเก็บใน rooms.turn_fx แล้วล้างเมื่อเปลี่ยนเทิร์น */
+const myFx=k=>(room?.turn_fx||[]).includes(k)&&myTurn();
+const tradeNeed=()=>myFx('kindtrade')?1:2;
+const brewOK=p=>{const n=KEYS.filter(k=>p[k]>=1).length;return myFx('secret')?n>=3:n===4};
+const cardUsed=()=>!!room&&room.card_used_turn===room.turn_count;
+const nextEvRound=()=>EV_ROUNDS.find(r=>r>=curRound());
+const addFx=k=>db.from('rooms').update({turn_fx:[...(room.turn_fx||[]),k]}).eq('id',room.id);
+const hasFx=k=>(room?.turn_fx||[]).includes(k);
+const CARDS={
+  kindtrade:{icon:'🤝',name:'แลกใจดี',desc:'เทิร์นนี้แลกเปลี่ยนแบบ 1 ต่อ 1',w:33,
+    can:p=>evActive('notrade')?'รอบนี้ห้ามแลกเปลี่ยน':tot(p)<1?'ต้องมีวัตถุดิบอย่างน้อย 1 ใบ':hasFx('kindtrade')?'ใช้ผลนี้อยู่แล้ว':null,
+    use:async()=>{await addFx('kindtrade');return 'เทิร์นนี้แลกเปลี่ยน 1 ต่อ 1'}},
+  cheers:{icon:'🍻',name:'ชนแก้ว',desc:'เลือกผู้เล่น 1 คน ทั้งคู่จั่วฟรีคนละ 1 ใบ',w:33,target:true,
+    can:()=>players.length<2?'ไม่มีผู้เล่นอื่น':null,
+    use:async({t})=>{
+      const {data}=await db.from('players').select().in('id',[me.id,t.id]);
+      const a=data.find(x=>x.id===me.id), b=data.find(x=>x.id===t.id), ka=rnd(KEYS), kb=rnd(KEYS);
+      await Promise.all([setHand(a.id,{[ka]:a[ka]+1}),setHand(b.id,{[kb]:b[kb]+1})]);
+      toast(`ชนแก้วกับ ${b.name}! คุณได้ ${ING[ka].e} ${ING[ka].th}`);
+      return `ชนแก้วกับ ${b.name} ทั้งคู่จั่วฟรีคนละ 1 ใบ`;}},
+  peek:{icon:'🔮',name:'ส่องอนาคต',desc:'ดูล่วงหน้าว่า Event ถัดไปคืออะไร',w:12,rare:true,
+    can:()=>nextEvRound()?null:'ไม่มี Event เหลือแล้ว',
+    use:async()=>{
+      let ev=room.next_event; if(!ev){ev=rollEvent();await db.from('rooms').update({next_event:ev}).eq('id',room.id)}
+      peekMemo={ev,round:nextEvRound(),ek:room.event_key||null}; peekShow=true; return null;}},
+  pickpocket:{icon:'🥷',name:'ล้วงกระเป๋า',desc:'ขโมยวัตถุดิบสุ่ม 1 ใบจากผู้เล่นที่เลือก',w:10,rare:true,target:true,pool:x=>tot(x)>0,
+    can:()=>players.some(x=>x.id!==me.id&&tot(x)>0)?null:'ไม่มีใครมีวัตถุดิบให้ขโมย',
+    use:async({t})=>{
+      const {data}=await db.from('players').select().in('id',[me.id,t.id]);
+      const a=data.find(x=>x.id===me.id), b=data.find(x=>x.id===t.id), k=randCard(b);
+      if(!k){toast('กระเป๋าของเป้าหมายว่างเปล่า');return `ล้วงกระเป๋า ${b.name} แต่กระเป๋าว่าง`}
+      await Promise.all([setHand(a.id,{[k]:a[k]+1}),setHand(b.id,{[k]:b[k]-1})]);
+      toast(`ล้วงกระเป๋า ${b.name} ได้ ${ING[k].e} ${ING[k].th}`);
+      return `ล้วงกระเป๋า ${b.name} ได้ 1 ใบ`;}},
+  secret:{icon:'🧪',name:'สูตรลับ',desc:'เทิร์นนี้ปรุงเบียร์ได้แม้ขาดวัตถุดิบ 1 ชนิด',w:7,rare:true,
+    can:p=>hasFx('secret')?'ใช้ผลนี้อยู่แล้ว':KEYS.filter(k=>p[k]>=1).length===3?null:'ใช้ได้เมื่อมีวัตถุดิบครบ 3 ชนิด (ขาดอีก 1 ชนิด)',
+    use:async()=>{await addFx('secret');return 'เทิร์นนี้ปรุงเบียร์ขาดวัตถุดิบได้ 1 ชนิด'}},
+  double:{icon:'⏩',name:'เทิร์นซ้อน',desc:'จบ Action หลักแล้วได้เล่นต่ออีก 1 รอบทันที',w:5,rare:true,
+    can:()=>hasFx('double')?'ใช้ผลนี้อยู่แล้ว':null,
+    use:async()=>{await addFx('double');return 'จะได้เล่นต่ออีก 1 รอบหลังจบ Action หลัก'}}
+};
+const FXN={kindtrade:'🤝 แลกใจดี: เทิร์นนี้แลกเปลี่ยน 1 ต่อ 1',secret:'🧪 สูตรลับ: เทิร์นนี้ปรุงเบียร์ขาดวัตถุดิบได้ 1 ชนิด',double:'⏩ เทิร์นซ้อน: จบ Action หลักแล้วได้เล่นต่ออีก 1 รอบ'};
+function pickCard(){
+  let r=Math.random()*Object.values(CARDS).reduce((a,c)=>a+c.w,0);
+  for(const [id,c] of Object.entries(CARDS)){r-=c.w;if(r<0)return id}
+  return 'kindtrade';
+}
+function cardState(id){
+  if(!myTurn()) return 'ยังไม่ถึงเทิร์นของคุณ';
+  if(anyPending()||busy) return 'รอสักครู่';
+  if(cardUsed()) return 'ใช้การ์ดได้ 1 ใบต่อเทิร์น';
+  return CARDS[id].can(mine());
+}
+function cardClick(id){
+  if(cardState(id)) return;
+  if(CARDS[id].target){cardTarget=id;render()} else useCard(id);
+}
+function pickTarget(tid){const c=cardTarget;cardTarget=null;useCard(c,tid)}
+async function useCard(cid,tid){
+  const c=CARDS[cid], p=mine();
+  if(!c||cardState(cid)||(c.target&&!tid)) return;
+  busy=true;
+  try{
+    const {data:ok,error}=await db.from('rooms').update({card_used_turn:room.turn_count}).eq('id',room.id).eq('turn_count',room.turn_count).select('id');
+    if(error) throw error; if(!ok?.length) return;
+    const cards=[...(p.cards||[])]; cards.splice(cards.indexOf(cid),1);
+    await db.from('players').update({cards}).eq('id',me.id);
+    const msg=await c.use({p,t:tid?players.find(x=>x.id===tid):null});
+    await logEv('card',`${p.name} ใช้การ์ด ${c.icon} ${c.name}${msg?' — '+msg:''}`);
+  }catch(e){toast('ผิดพลาด: '+e.message)}
+  finally{busy=false;await load();render()}
+}
+function acardHTML(id,can,why){
+  const d=CARDS[id];
+  return `<button class="acard ${d.rare?'rare':''}" ${can?'':'disabled'} title="${esc(why||'')}" onclick="cardClick('${id}')"><span class="ar">${d.rare?'RARE':'COMMON'}</span><span class="ai">${d.icon}</span><span class="an">${d.name}</span><span class="ad">${d.desc}</span></button>`;
+}
+function targetHTML(){
+  const d=CARDS[cardTarget], list=players.filter(x=>x.id!==me.id&&(!d.pool||d.pool(x)));
+  return `<div class="fixed inset-0 bg-black/75 flex items-center justify-center z-40 p-4"><div class="wood p-5 w-full max-w-sm"><div class="font-bold text-lg mb-1">${d.icon} ${d.name}</div><div class="text-sm text-amber-300 mb-3">เลือกผู้เล่นเป้าหมาย</div><div class="space-y-2">${list.map(x=>`<button class="flex items-center gap-3 w-full bg-black/30 rounded-xl px-3 py-2 border border-amber-900 hover:border-amber-400" onclick="pickTarget('${x.id}')">${av(x)}<span class="flex-1 text-left font-bold truncate">${esc(x.name)}</span><span class="chip">🎒 ${tot(x)}</span></button>`).join('')}</div><button class="w-full mt-4 rounded-xl border border-amber-700 py-2" onclick="cardTarget=null;render()">ยกเลิก</button></div></div>`;
+}
+function peekHTML(){
+  const m=peekMemo, ev=EVENTS[m.ev];
+  return `<div class="fixed inset-0 bg-black/75 flex items-center justify-center z-40 p-4"><div class="wood p-6 text-center max-w-sm w-full"><div class="evicon">🔮</div><div class="evtag">SECRET · ส่องอนาคต</div><div class="evtitle">${ev.icon} ${ev.title}</div><div class="evdesc">${ev.desc}</div><div class="evinfo">จะเกิดเมื่อจบรอบที่ ${m.round} (มีผลในรอบที่ ${m.round+1})<br><small>ถ้าเงื่อนไขของ Event นั้นไม่ครบตอนเกิดจริง ระบบจะสุ่มใหม่</small></div><button class="btn w-full" onclick="peekShow=false;render()">รับทราบ</button></div></div>`;
+}
+
 function drawCard(){act(async()=>{
   const pool=evActive('hopsshort')?KEYS.filter(x=>x!=='hops'):KEYS, k=rnd(pool), p=mine();
   await upd({[k]:p[k]+1}); logEv('draw',`${p.name} จั่ว ${ING[k].e}`); fx.push({t:'fly',k}); await setTurn(); toast(`จั่วได้ ${ING[k].e} ${ING[k].th}`);
@@ -440,7 +612,7 @@ function drawCard(){act(async()=>{
 function openTrade(){ if(!myTurn()||evActive('notrade')||anyPending()) return; tradeOpen=true; give={water:0,malt:0,hops:0,yeast:0}; want=null; render() }
 function giveAdj(k,d){
   const p=mine(), tot=KEYS.reduce((s,x)=>s+give[x],0);
-  if(d>0&&(tot>=2||give[k]>=p[k])) return;
+  if(d>0&&(tot>=tradeNeed()||give[k]>=p[k])) return;
   if(d<0&&give[k]<=0) return;
   give[k]+=d; render();
 }
@@ -451,8 +623,8 @@ function doTrade(){act(async()=>{
 })}
 function brewClick(){ if(evActive('extrabrew')){extraOpen=true;extraPick=null;render()} else brew() }
 function brew(extra){act(async()=>{
-  const p=mine(); if(!KEYS.every(k=>p[k]>=1)) return toast('วัตถุดิบไม่ครบ');
-  const patch={beer_points:p.beer_points+1}; KEYS.forEach(k=>patch[k]=p[k]-1);
+  const p=mine(); if(!brewOK(p)) return toast('วัตถุดิบไม่ครบ');
+  const patch={beer_points:p.beer_points+1}; KEYS.forEach(k=>patch[k]=p[k]-(p[k]>=1?1:0));
   if(evActive('extrabrew')){
     if(!extra||patch[extra]<1) return toast('ต้องเลือกวัตถุดิบเพิ่ม 1 ใบ');
     patch[extra]-=1;
@@ -478,8 +650,8 @@ async function discardPick(k){
 }
 async function rematch(){
   await db.from('game_log').delete().eq('room_id',room.id);
-  await db.from('players').update({water:0,malt:0,hops:0,yeast:0,beer_points:0,pending:null}).eq('room_id',room.id);
-  await db.from('rooms').update({status:'waiting',current_turn:0,winner_id:null,turn_count:0,event:null,event_key:null,event_round:0,event_info:null,turn_deadline:null}).eq('id',room.id);
+  await db.from('players').update({water:0,malt:0,hops:0,yeast:0,beer_points:0,pending:null,cards:[]}).eq('room_id',room.id);
+  await db.from('rooms').update({status:'waiting',current_turn:0,winner_id:null,turn_count:0,event:null,event_key:null,event_round:0,event_info:null,turn_deadline:null,card_used_turn:-1,turn_fx:[],next_event:null}).eq('id',room.id);
 }
 
 /* ---------- UI ---------- */
@@ -535,9 +707,13 @@ function waitingHTML(){
     <button class="text-sm underline text-amber-200/60" onclick="leave()">ออกจากห้อง</button></div>`}
 function boardHTML(){
   const s=sorted(), cur=current(), p=mine(), t=myTurn();
-  const canBrew=KEYS.every(k=>p[k]>=1), total=KEYS.reduce((a,k)=>a+p[k],0);
-  const noTrade=evActive('notrade'), extraNeed=evActive('extrabrew'), canBrewNow=canBrew&&(!extraNeed||total>=5);
+  const canBrew=brewOK(p), total=KEYS.reduce((a,k)=>a+p[k],0);
+  const noTrade=evActive('notrade'), extraNeed=evActive('extrabrew'), canBrewNow=canBrew&&(!extraNeed||total>=KEYS.filter(k=>p[k]>=1).length+1);
   const hopsShort=evActive('hopsshort');
+  const myCards=p.cards||[];
+  const cardsHTML=`<div class="mt-5"><div class="flex items-center justify-between mb-2"><span class="font-bold text-sm text-amber-300">🃏 การ์ด Action (${myCards.length})</span><span class="text-xs text-amber-200/60">${cardUsed()?'✔ ใช้การ์ดเทิร์นนี้แล้ว':'ใช้ได้ 1 ใบ/เทิร์น ก่อน Action หลัก'}</span></div><div class="acards">${myCards.length?myCards.map(id=>{const why=cardState(id);return acardHTML(id,!why,why)}).join(''):'<div class="text-xs text-amber-200/50 py-3">ไม่มีการ์ด Action เหลือแล้ว</div>'}</div></div>`;
+  const fxBar=(room.turn_fx||[]).length?`<div class="fxbar">${room.turn_fx.map(k=>FXN[k]||'').join('<br>')}</div>`:'';
+  const peekChip=peekMemo&&peekMemo.ek===(room.event_key||null)&&EVENTS[peekMemo.ev]?`<div class="fxbar">🔮 Event ถัดไป: ${EVENTS[peekMemo.ev].icon} ${EVENTS[peekMemo.ev].title} (จบรอบที่ ${peekMemo.round}) <small>· อาจเปลี่ยนถ้าเงื่อนไขไม่ครบ</small></div>`:'';
   const timerHTML=room.turn_deadline?`<div class="timer"><div class="tbar"><i id="tbar" style="width:100%"></i></div><span id="ttxt">⏱️ --</span></div>`:'';
   const hostBar=isHost()?`<div class="hostbar"><span>👑 โฮสต์</span>${cur&&cur.id!==me.id&&!anyPending()?`<button class="chip" onclick="skipTurn()">⏭️ ข้ามเทิร์น ${esc(cur.name)}</button>`:''}${anyPending()?`<button class="chip" onclick="forceResolve()">🎲 บังคับทิ้งสุ่มให้คนที่ยังไม่เลือก</button>`:''}</div>`:'';
   const evBar=(noTrade||extraNeed||hopsShort)?`<div class="evbar">${EVENTS[room.event].icon} <b>${EVENTS[room.event].title}</b> ${EVENTS[room.event].desc}</div>`:'';
@@ -545,7 +721,7 @@ function boardHTML(){
   const winner=players.find(x=>x.id===room.winner_id), host=s[0]?.id===me.id;
   const others=s.filter(x=>x.id!==me.id).map(o=>`<div class="wood p-3 ${cur?.id===o.id?'turn':''}">
     <div class="flex items-center gap-3">${av(o)}<div class="flex-1 min-w-0"><div class="font-bold truncate">${esc(o.name)}</div><div class="pips">${pips(o.beer_points)}</div></div>${cur?.id===o.id?'<span class="tag">⚔️ กำลังเล่น</span>':''}</div>
-    <div class="flex flex-wrap gap-2 mt-2">${KEYS.map(k=>`<span class="chip">${ING[k].e}<b>${o[k]}</b></span>`).join('')}</div>${isHost()?`<button class="kick" onclick="kickClick('${o.id}')">${kickArm===o.id?'❗ ยืนยันเตะ':'🚪 เตะ'}</button>`:''}</div>`).join('');
+    <div class="flex flex-wrap gap-2 mt-2">${KEYS.map(k=>`<span class="chip">${ING[k].e}<b>${o[k]}</b></span>`).join('')}<span class="chip" title="การ์ด Action">🃏<b>${(o.cards||[]).length}</b></span></div>${isHost()?`<button class="kick" onclick="kickClick('${o.id}')">${kickArm===o.id?'❗ ยืนยันเตะ':'🚪 เตะ'}</button>`:''}</div>`).join('');
   const rec=`<div class="recipe">${KEYS.map(k=>`<span class="rslot ${p[k]>=1?'ok':''}">${ING[k].e}</span>`).join('<i>+</i>')}<i>➜</i><span class="rslot brewout ${canBrewNow?'ok':''}">🍺</span></div>`;
   const dis=ok=>t&&!busy&&!anyPending()&&ok?'':'disabled';
   const confetti=room.status==='finished'?Array.from({length:36},(_,i)=>`<span class="conf" style="left:${Math.random()*100}%;background:${['#ffc43d','#ff6b4a','#6fdc5a','#4cc3e8','#d98cff'][i%5]};animation-delay:${(Math.random()*3).toFixed(2)}s;animation-duration:${(2.5+Math.random()*2).toFixed(2)}s"></span>`).join(''):'';
@@ -558,17 +734,22 @@ function boardHTML(){
   ${timerHTML}
   ${hostBar}
   ${evBar}
-  ${others?`<div class="grid gap-3 mb-5" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">${others}</div><div class="vs">⚔️ VS ⚔️</div>`:''}
+  ${fxBar}
+  ${peekChip}
+  ${others?`<div class="oppgrid">${others}</div><div class="vs">⚔️ VS ⚔️</div>`:''}
   <div class="wood p-4 ${t?'turn':''}">
     <div class="flex items-center gap-3 mb-3">${av(p)}<div class="flex-1 min-w-0"><div class="font-bold text-lg truncate">${esc(p.name)}</div><div class="pips" id="mepips">${pips(p.beer_points)}</div></div><div class="text-right text-xs text-amber-200/60">${total} การ์ด</div></div>
     ${rec}
     <div class="hand">${KEYS.map(k=>cardHTML(k,p[k])).join('')}</div>
-    <div class="grid grid-cols-3 gap-3 mt-6">
+    ${cardsHTML}
+    <div class="actbar grid grid-cols-3 gap-3">
       <button class="abtn draw" ${dis(true)} onclick="drawCard()"><span class="ai">🃏</span><span class="at">จั่วการ์ด</span><span class="as">สุ่ม +1 ชิ้น</span></button>
-      <button class="abtn trade" ${dis(total>=2&&!noTrade)} onclick="openTrade()"><span class="ai">${noTrade?'🚫':'🔄'}</span><span class="at">แลกเปลี่ยน</span><span class="as">${noTrade?'ห้ามในรอบนี้':'2 ชิ้น → 1 ชิ้น'}</span></button>
+      <button class="abtn trade" ${dis(total>=tradeNeed()&&!noTrade)} onclick="openTrade()"><span class="ai">${noTrade?'🚫':'🔄'}</span><span class="at">แลกเปลี่ยน</span><span class="as">${noTrade?'ห้ามในรอบนี้':`${tradeNeed()} ชิ้น → 1 ชิ้น`}</span></button>
       <button class="abtn brew ${t&&canBrewNow?'ready':''}" ${dis(canBrewNow)} onclick="brewClick()"><span class="ai">🍻</span><span class="at">ปรุงเบียร์</span><span class="as">${extraNeed?'อย่างละ 1 + เพิ่ม 1 ใบ':'อย่างละ 1 → +1 แต้ม'}</span></button>
     </div></div>
   ${logBox()}
+  ${cardTarget&&t&&!anyPending()?targetHTML():''}
+  ${peekShow&&peekMemo?peekHTML():''}
   ${tradeOpen&&t?tradeHTML(p):''}
   ${extraOpen&&t&&extraNeed?extraHTML(p):''}
   ${showEv?eventHTML(p):''}
@@ -592,22 +773,30 @@ function eventHTML(p){
     <div class="evtitle ${ev.rare?'rare-t':''}">${ev.title}</div><div class="evdesc">${ev.desc}</div>${room.event_info?`<div class="evinfo">${esc(room.event_info)}</div>`:''}${body}</div></div>`;
 }
 function logBox(){
-  const l=[...logs].reverse().slice(0,20);
-  return `<div class="logbox"><div class="logh">📜 บันทึกเหตุการณ์</div><div class="logl">${l.length?l.map(x=>`<div class="logi ${esc(x.kind||'')}">${esc(x.msg)}</div>`).join(''):'<div class="logi">ยังไม่มีเหตุการณ์</div>'}</div></div>`;
+  const all=[...logs].reverse(), l=logOpen?all.slice(0,20):all.slice(0,1);
+  return `<div class="logbox"><button class="logh" onclick="logOpen=!logOpen;render()"><span>📜 บันทึกเหตุการณ์</span><span>${logOpen?'▾ ย่อ':'▸ ดูทั้งหมด'}</span></button><div class="logl">${l.length?l.map(x=>`<div class="logi ${esc(x.kind||'')}">${esc(x.msg)}</div>`).join(''):'<div class="logi">ยังไม่มีเหตุการณ์</div>'}</div></div>`;
 }
 function tradeHTML(p){
   const tot=KEYS.reduce((s,k)=>s+give[k],0);
   return `<div class="fixed inset-0 bg-black/70 flex items-center justify-center z-30 p-4"><div class="wood rounded-2xl p-5 w-full max-w-md">
     <div class="font-bold text-lg mb-2">🔄 แลกเปลี่ยน</div>
-    <div class="text-sm text-amber-300 mb-1">สละ 2 ชิ้น (เลือกแล้ว ${tot}/2)</div>
+    <div class="text-sm text-amber-300 mb-1">สละ ${tradeNeed()} ชิ้น (เลือกแล้ว ${tot}/${tradeNeed()})</div>
     <div class="grid grid-cols-4 gap-2 mb-4">${KEYS.map(k=>`<div class="text-center bg-black/30 rounded-lg p-2">
       <div class="text-2xl">${ING[k].e}</div><div class="text-xs">มี ${p[k]}</div>
       <div class="flex justify-center items-center gap-1 mt-1"><button class="px-2 bg-amber-900 rounded" onclick="giveAdj('${k}',-1)">−</button><b>${give[k]}</b><button class="px-2 bg-amber-700 rounded" onclick="giveAdj('${k}',1)">+</button></div></div>`).join('')}</div>
     <div class="text-sm text-amber-300 mb-1">รับ 1 ชิ้น</div>
     <div class="grid grid-cols-4 gap-2 mb-4">${KEYS.map(k=>`<button class="rounded-lg p-2 text-center border-2 ${want===k?'border-amber-400 bg-amber-700/50':'border-transparent bg-black/30'}" onclick="want='${k}';render()"><div class="text-2xl">${ING[k].e}</div><div class="text-xs">${ING[k].th}</div></button>`).join('')}</div>
-    <div class="flex gap-2"><button class="btn flex-1" ${tot===2&&want?'':'disabled'} onclick="doTrade()">ยืนยันแลก</button>
+    <div class="flex gap-2"><button class="btn flex-1" ${tot===tradeNeed()&&want?'':'disabled'} onclick="doTrade()">ยืนยันแลก</button>
     <button class="flex-1 rounded-xl border border-amber-700" onclick="tradeOpen=false;render()">ยกเลิก</button></div></div></div>`;
 }
+/* ---------- กันซูมจากการแตะ 2 ที (iOS) — ปุ่ม/ช่องกรอกจัดการด้วย touch-action อยู่แล้ว ---------- */
+let _lt=0;
+document.addEventListener('touchend',e=>{
+  const n=Date.now();
+  if(n-_lt<350&&e.cancelable&&!e.target.closest('button,input,a,label')) e.preventDefault();
+  _lt=n;
+},{passive:false});
+
 /* ---------- 8-bit music (synthesized, original tune) ---------- */
 const Music=(()=>{
   let ctx,master,noiseBuf,step=0,next=0,timer;
@@ -676,6 +865,7 @@ const Music=(()=>{
     turn:()=>seq('sine',[[988,0],[1319,.1]],.25,.2),
     discard:()=>seq('triangle',[[330,0],[247,.09],[165,.18]],.14,.25),
     skip:()=>seq('square',[[660,0],[440,.1]],.12,.12),
+    card:()=>seq('sine',[[880,0],[1175,.07],[1568,.14],[2093,.21]],.18,.16),
     tick:()=>seq('square',[[1200,0]],.05,.1)
   };
   function sfx(n){if(!ctx||!enabled||ctx.state!=='running')return;try{SFX[n]&&SFX[n]()}catch(e){}}
