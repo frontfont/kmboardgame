@@ -87,10 +87,35 @@
   .evtag{font-family:'Bungee','Mitr',sans-serif;font-size:.6rem;letter-spacing:.2em;color:#e0a85a;margin:.6rem 0 .3rem}
   .evtitle{font-family:'Mitr',sans-serif;font-weight:600;font-size:1.55rem;line-height:1.3;color:#ffc43d;text-shadow:0 3px 0 #5a2f08}
   .evdesc{margin:.6rem 0 1rem;color:#fde7b8;line-height:1.6}
+  .evinfo{margin:0 0 1rem;padding:.6rem .8rem;border-radius:.7rem;background:#1a0d05;border:1px dashed #d9a25a;font-size:.9rem;line-height:1.6;color:#ffe2a8}
+  .evtag.rare{color:#ff9bf0;text-shadow:0 0 12px #d98cff}
+  .rare-t{color:#ffb6f5;text-shadow:0 3px 0 #5a1a5a,0 0 18px #d98cff}
   .pickc{display:flex;flex-direction:column;align-items:center;gap:.1rem;width:76px;padding:.55rem .2rem;border-radius:.8rem;background:#1a0d05;border:2px solid #8a5526;font-size:1.7rem;line-height:1.2;box-shadow:inset 0 2px 6px #000a;transition:transform .1s,border-color .1s}
   .pickc span{font-family:'Mitr',sans-serif;font-size:.75rem}.pickc b{font-family:'Bungee',sans-serif;font-size:.8rem;color:#ffc43d}
   .pickc:hover:not(:disabled){transform:translateY(-3px);border-color:#ffd56a;box-shadow:0 0 14px #f5b53a88}
   .pickc:disabled{opacity:.3;cursor:not-allowed}
+  .avatar{position:relative}
+  .avatar::after{content:"";position:absolute;right:-3px;bottom:-3px;width:13px;height:13px;border-radius:50%;border:2px solid #1a0d05;background:#6b6b6b}
+  .avatar.on::after{background:#3fe05a;box-shadow:0 0 8px #3fe05a}
+  .timer{display:flex;align-items:center;gap:.7rem;max-width:26rem;margin:-.5rem auto 1.1rem;font-family:'Mitr',sans-serif;font-size:.8rem;color:#e0c08a}
+  .tbar{flex:1;height:10px;border-radius:99px;background:#1a0d05;border:1px solid #6b4220;box-shadow:inset 0 2px 4px #000a;overflow:hidden}
+  .tbar i{display:block;height:100%;border-radius:99px;background:linear-gradient(#ffd56a,#e08a10);transition:width .25s linear}
+  .timer span{min-width:5.8rem;text-align:right}
+  .timer.low{color:#ffb3a0;animation:blink .6s infinite}
+  .timer.low .tbar i{background:linear-gradient(#ff8a6b,#d6453d)}
+  .hostbar{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;justify-content:center;margin:-.3rem 0 1rem;font-size:.8rem;color:#e0a85a}
+  .hostbar .chip{cursor:pointer}
+  .kick{position:absolute;bottom:.55rem;right:.7rem;z-index:2;font-family:'Mitr',sans-serif;font-size:.7rem;background:#3a1710;border:1px solid #b34a32;color:#ffb3a0;border-radius:999px;padding:.1rem .65rem}
+  .kick:hover{background:#6b2418}
+  .logbox{margin-top:1.3rem;padding:.7rem .9rem;border-radius:1rem;background:linear-gradient(#2a170b,#1d0f06);border:2px solid #5a3a1c;box-shadow:inset 0 2px 8px #000a}
+  .logh{font-family:'Mitr',sans-serif;font-size:.8rem;color:#e0a85a;margin-bottom:.4rem}
+  .logl{max-height:8.5rem;overflow-y:auto;font-size:.82rem;line-height:1.55}
+  .logi{padding:.15rem 0;border-bottom:1px dashed #5a3a1c66;color:#d9bf92}
+  .logi:first-child{color:#ffe7b0;font-weight:600}
+  .logi.event{color:#ffb88a}.logi.brew{color:#b9f27a}.logi.win{color:#ffd56a}.logi.skip,.logi.kick,.logi.timeout{color:#ff9d8a}
+  .flyc{position:fixed;z-index:60;width:56px;height:78px;border-radius:10px;background:linear-gradient(#fff6d6,#e3c585);display:flex;align-items:center;justify-content:center;font-size:2rem;box-shadow:0 8px 16px #000a;pointer-events:none}
+  .plus1{position:fixed;z-index:60;font-family:'Bungee',sans-serif;font-size:1.3rem;color:#ffd56a;text-shadow:0 2px 0 #5a2f08,0 0 12px #f5b53a;pointer-events:none}
+  .flash{position:fixed;inset:0;z-index:35;pointer-events:none;background:radial-gradient(ellipse at center,transparent 40%,#d6453d99)}
   @media (prefers-reduced-motion:reduce){.bubble,.mug,.emblem,.turn,.tag,.ready,.conf,.ribbon{animation:none!important}}
 </style>
 </head>
@@ -109,7 +134,7 @@ const ING={
   hops:{th:'ฮอปส์',e:'🌿',c:'from-lime-400 to-green-800'},
   yeast:{th:'ยีสต์',e:'🦠',c:'from-rose-300 to-orange-700'}
 };
-const KEYS=Object.keys(ING), WIN=3, MAXP=4;
+const KEYS=Object.keys(ING), WIN=3, MAXP=8;
 let me=null, room=null, players=[], chan=null, tradeOpen=false, give={water:0,malt:0,hops:0,yeast:0}, want=null, busy=false;
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -132,12 +157,13 @@ async function joinRoom(){
   if(!name||!c) return toast('ใส่ชื่อและ Room Code');
   const {data:r}=await db.from('rooms').select().eq('code',c).maybeSingle();
   if(!r) return toast('ไม่พบห้องนี้');
-  const {data:ps}=await db.from('players').select().eq('room_id',r.id);
-  const same=ps.find(p=>p.name===name);
+  const {data:all}=await db.from('players').select().eq('room_id',r.id);
+  const ps=all.filter(x=>!x.kicked), same=all.find(x=>x.name===name);
+  if(same?.kicked) return toast('คุณถูกเตะออกจากห้องนี้แล้ว');
   if(same){ return enter(r,name,same.seat,false,same); }
   if(r.status!=='waiting') return toast('เกมเริ่มไปแล้ว');
   if(ps.length>=MAXP) return toast('ห้องเต็ม (สูงสุด '+MAXP+' คน)');
-  await enter(r,name,ps.length,false);
+  await enter(r,name,Math.max(-1,...all.map(x=>x.seat))+1,false);
 }
 async function enter(r,name,seat,host,existing){
   let p=existing;
@@ -152,7 +178,7 @@ async function enter(r,name,seat,host,existing){
 async function leave(){
   if(chan) db.removeChannel(chan); chan=null;
   localStorage.removeItem('bw_player'); localStorage.removeItem('bw_room');
-  me=null;room=null;players=[]; render();
+  me=null;room=null;players=[];logs=[];soundedId=0;lastEvKey=undefined;onlineIds=new Set(); render();
 }
 async function restore(){
   const pid=localStorage.getItem('bw_player'), rid=localStorage.getItem('bw_room');
@@ -165,26 +191,39 @@ async function restore(){
 
 /* ---------- Realtime ---------- */
 async function load(){
-  const [{data:r},{data:ps}]=await Promise.all([
+  const [{data:r},{data:ps},{data:lg}]=await Promise.all([
     db.from('rooms').select().eq('id',room.id).single(),
-    db.from('players').select().eq('room_id',room.id)
+    db.from('players').select().eq('room_id',room.id),
+    db.from('game_log').select().eq('room_id',room.id).order('id',{ascending:false}).limit(30)
   ]);
-  if(r) room=r; if(ps) players=ps;
+  if(r) room=r;
+  if(ps){
+    const self=ps.find(x=>x.id===me?.id);
+    if(me&&self?.kicked){toast('คุณถูกเตะออกจากห้อง');await leave();return}
+    players=ps.filter(x=>!x.kicked);
+  }
+  if(lg){logs=lg.reverse(); if(!soundedId) soundedId=Math.max(0,...logs.map(x=>x.id))}
 }
 function subscribe(){
   if(chan) db.removeChannel(chan);
   const refresh=async()=>{await load();render()};
-  chan=db.channel('brew-'+room.id)
+  chan=db.channel('brew-'+room.id,{config:{presence:{key:me.id}}})
+    .on('presence',{event:'sync'},()=>{onlineIds=new Set(Object.keys(chan.presenceState()));render()})
     .on('postgres_changes',{event:'*',schema:'public',table:'players',filter:'room_id=eq.'+room.id},refresh)
     .on('postgres_changes',{event:'*',schema:'public',table:'rooms',filter:'id=eq.'+room.id},refresh)
-    .subscribe();
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'game_log',filter:'room_id=eq.'+room.id},pl=>{
+      const r=pl.new; if(!logs.some(x=>x.id===r.id)) logs=[...logs,r].slice(-30);
+      if(r.id>soundedId){soundedId=r.id;onLog(r)}
+      render();
+    })
+    .subscribe(st=>{if(st==='SUBSCRIBED') chan.track({at:Date.now()})});
 }
 
 /* ---------- Game actions ---------- */
 const nextTurn=()=>(room.current_turn+1)%sorted().length;
 async function startGame(){
   if(players.length<2) return toast('ต้องมีผู้เล่นอย่างน้อย 2 คน');
-  await db.from('rooms').update({status:'playing',current_turn:0,winner_id:null,turn_count:0,event:null,event_key:null,event_round:0}).eq('id',room.id);
+  await db.from('rooms').update({status:'playing',current_turn:0,winner_id:null,turn_count:0,event:null,event_key:null,event_round:0,event_info:null,turn_deadline:Date.now()+TURN_SECS*1000}).eq('id',room.id);
 }
 async function act(fn){
   if(busy||!myTurn()||anyPending()) return; busy=true;
@@ -192,35 +231,211 @@ async function act(fn){
   busy=false; render();
 }
 const upd=async(patch)=>{const {error}=await db.from('players').update(patch).eq('id',me.id); if(error) throw error};
-const EV_ROUNDS=[2,4,6,9,10,12,15]; // Event ขึ้นเมื่อจบรอบเหล่านี้ และมีผลในรอบถัดไป
+const EV_ROUNDS=[2,4,6,9,10,12,15,18,20,23,24,25]; // Event ขึ้นเมื่อจบรอบเหล่านี้ และมีผลในรอบถัดไป
+const RARE_CHANCE=0.05; // โอกาสออก "สลับกระเป๋า" (ที่เหลือแบ่งเท่าๆ กัน)
 const EVENTS={
   notrade:{icon:'🚫',title:'ห้ามแลกเปลี่ยน!',desc:'รอบนี้ห้ามใช้ Action แลกเปลี่ยนวัตถุดิบ'},
   discard:{icon:'🗑️',title:'ของเสียในโรงเบียร์!',desc:'ทุกคนต้องเลือกทิ้งวัตถุดิบ 1 ใบ'},
   extrabrew:{icon:'🔥',title:'เตาต้มกินฟืน!',desc:'รอบนี้การปรุงเบียร์ต้องใช้วัตถุดิบเพิ่มอีก 1 ใบ (ชนิดไหนก็ได้)'},
-  discarddraw:{icon:'🔀',title:'ล็อตใหม่เข้าโรงเบียร์!',desc:'ทุกคนเลือกทิ้งวัตถุดิบ 1 ใบ แล้วจั่วใหม่ 1 ใบแบบสุ่ม'}
+  discarddraw:{icon:'🔀',title:'ล็อตใหม่เข้าโรงเบียร์!',desc:'ทุกคนเลือกทิ้งวัตถุดิบ 1 ใบ แล้วจั่วใหม่ 1 ใบแบบสุ่ม'},
+  rain:{icon:'🌧️',title:'ฝนตกหนัก!',desc:'น้ำฝนเต็มโรงเบียร์ ทุกคนได้น้ำเพิ่ม 1 ใบ'},
+  moldmalt:{icon:'🌾',title:'มอลต์ขึ้นรา!',desc:'ทุกคนที่มีมอลต์เสียมอลต์ 1 ใบ'},
+  yeastboom:{icon:'🦠',title:'ยีสต์ระบาด!',desc:'ทุกคนได้ยีสต์เพิ่ม 1 ใบ'},
+  hopsshort:{icon:'🌿',title:'ฮอปส์ขาดตลาด!',desc:'รอบนี้จั่วการ์ดแล้วจะไม่ได้ฮอปส์'},
+  brawl:{icon:'🥊',title:'ตะลุมบอนในบาร์!',desc:'ผู้นำแต้มสูงสุดถูกรุม ต้องทิ้งวัตถุดิบ 1 ใบ'},
+  duel:{icon:'🤺',title:'ดวลวัตถุดิบ!',desc:'สุ่มผู้เล่น 2 คนดวลกัน ผู้ชนะแย่งวัตถุดิบ 1 ใบจากผู้แพ้'},
+  thief:{icon:'🕵️',title:'ขโมยเข้าโรงเบียร์!',desc:'ผู้ถือการ์ดมากที่สุดเสียการ์ดสุ่ม 1 ใบ'},
+  inspector:{icon:'📋',title:'ผู้ตรวจสอบมาตรวจ!',desc:'ใครถือเกิน 5 ใบต้องทิ้งให้เหลือ 5 ใบ'},
+  swapbag:{icon:'🎰',title:'สลับกระเป๋า!!',desc:'สุ่มผู้เล่น 2 คนสลับวัตถุดิบทั้งมือกัน',rare:true}
 };
 let seenEv=null, extraOpen=false, extraPick=null;
 const curRound=()=>room?Math.floor((room.turn_count||0)/Math.max(1,players.length))+1:1;
 const evActive=k=>!!room&&room.event===k&&room.event_round===curRound();
 const anyPending=()=>players.some(x=>x.pending);
+
+const tot=x=>KEYS.reduce((a,k)=>a+x[k],0);
+const rnd=a=>a[Math.random()*a.length|0];
+const hand=x=>({water:x.water,malt:x.malt,hops:x.hops,yeast:x.yeast});
+const setHand=(id,h)=>db.from('players').update(h).eq('id',id);
+const setPending=(list,v)=>list.length?db.from('players').update({pending:v}).in('id',list.map(x=>x.id)):null;
+const randCard=x=>{const bag=KEYS.flatMap(k=>Array(x[k]).fill(k));return bag.length?rnd(bag):null};
+const twoRandom=ps=>[...ps].sort(()=>Math.random()-.5).slice(0,2);
+const names=l=>l.map(x=>x.name).join(', ');
+
+// สุ่ม Event: สลับกระเป๋า 10% / ที่เหลือเท่ากัน (ข้าม Event ที่ใช้ไม่ได้ในสถานการณ์นั้น)
+function pickEvent(ps){
+  if(ps.length>=2&&Math.random()<RARE_CHANCE) return 'swapbag';
+  const mxP=Math.max(...ps.map(x=>x.beer_points));
+  const ok={
+    discard:ps.some(x=>tot(x)>0), discarddraw:ps.some(x=>tot(x)>0),
+    moldmalt:ps.some(x=>x.malt>0), thief:ps.some(x=>tot(x)>0),
+    inspector:ps.some(x=>tot(x)>5), duel:ps.length>=2,
+    brawl:mxP>=1&&ps.some(x=>x.beer_points===mxP&&tot(x)>0)
+  };
+  return rnd(Object.keys(EVENTS).filter(k=>k!=='swapbag'&&ok[k]!==false));
+}
+// ทำผลของ Event ที่เกิดทันที แล้วคืนข้อความสรุปให้แสดงในป๊อปอัป
+async function runEvent(ev,ps){
+  switch(ev){
+    case 'discard': case 'discarddraw':
+      await setPending(ps.filter(x=>tot(x)>0),ev==='discard'?'discard':'discard_draw'); return null;
+    case 'rain': case 'yeastboom': {
+      const k=ev==='rain'?'water':'yeast';
+      await Promise.all(ps.map(x=>setHand(x.id,{[k]:x[k]+1}))); return `ทุกคนได้ ${ING[k].e} ${ING[k].th} เพิ่ม 1 ใบ`;}
+    case 'moldmalt': {
+      const hit=ps.filter(x=>x.malt>0);
+      await Promise.all(hit.map(x=>setHand(x.id,{malt:x.malt-1})));
+      return hit.length?`${names(hit)} เสีย 🌾 มอลต์ไป 1 ใบ`:'ไม่มีใครมีมอลต์ รอดตัวไป!';}
+    case 'brawl': {
+      const mx=Math.max(...ps.map(x=>x.beer_points)), L=ps.filter(x=>x.beer_points===mx&&tot(x)>0);
+      await setPending(L,'discard'); return `ผู้นำแต้ม (${names(L)}) ถูกรุม! ต้องทิ้งวัตถุดิบ 1 ใบ`;}
+    case 'thief': {
+      const mt=Math.max(...ps.map(tot)), V=ps.filter(x=>tot(x)===mt), out=[];
+      for(const x of V){const k=randCard(x),h=hand(x);h[k]--;await setHand(x.id,h);out.push(`${x.name} (${ING[k].e})`)}
+      return `โจรบุก! คนถือการ์ดมากสุดโดนขโมยไป 1 ใบ: ${out.join(', ')}`;}
+    case 'duel': {
+      const [w,l]=twoRandom(ps), k=randCard(l);
+      if(!k) return `${w.name} ชนะดวลกับ ${l.name} แต่ไม่มีอะไรให้แย่ง`;
+      const hw=hand(w),hl=hand(l);hw[k]++;hl[k]--;
+      await Promise.all([setHand(w.id,hw),setHand(l.id,hl)]);
+      return `${w.name} ชนะดวลกับ ${l.name} และแย่ง ${ING[k].e} ${ING[k].th} ไป 1 ใบ`;}
+    case 'inspector': {
+      const V=ps.filter(x=>tot(x)>5); await setPending(V,'trim');
+      return `${names(V)} ถือเกิน 5 ใบ ต้องทิ้งให้เหลือ 5 ใบ`;}
+    case 'swapbag': {
+      const [a,b]=twoRandom(ps);
+      await Promise.all([setHand(a.id,hand(b)),setHand(b.id,hand(a))]);
+      return `${a.name} กับ ${b.name} สลับกระเป๋ากัน!`;}
+  }
+  return null; // notrade / extrabrew / hopsshort ใช้ผลตลอดรอบ
+}
+const TURN_SECS=45; // เวลาต่อเทิร์น (วินาที)
+let logs=[],soundedId=0,lastEvKey,onlineIds=new Set(),kickArm=null,fx=[],wasMine=false,autoBusy=false,autoFor=-1,lastTick=0;
+const BAD=['notrade','discard','extrabrew','discarddraw','moldmalt','hopsshort','brawl','duel','thief','inspector','swapbag'];
+const isHost=()=>!!me&&sorted()[0]?.id===me.id;
+const logEv=(kind,msg)=>db.from('game_log').insert({room_id:room.id,actor:me.id,kind,msg}).then(()=>{},()=>{});
+function onLog(r){Music.sfx({draw:'draw',trade:'trade',brew:'brew',event:'event',win:'win',discard:'discard',skip:'skip',timeout:'skip',kick:'skip'}[r.kind]||'tick')}
 const setTurn=async(patch={})=>{
   const n=sorted().length, tc=(room.turn_count||0)+1;
-  const u={current_turn:nextTurn(),turn_count:tc,...patch};
+  const u={current_turn:nextTurn(),turn_count:tc,turn_deadline:Date.now()+TURN_SECS*1000,...patch};
+  let evMsg=null;
   if(tc%n===0&&EV_ROUNDS.includes(tc/n)){
-    const ev=Object.keys(EVENTS)[Math.random()*4|0];
-    Object.assign(u,{event:ev,event_key:Math.random().toString(36).slice(2,9),event_round:tc/n+1});
-    if(ev==='discard'||ev==='discarddraw'){
-      const {data}=await db.from('players').select().eq('room_id',room.id);
-      const ids=(data||[]).filter(x=>KEYS.reduce((a,k)=>a+x[k],0)>0).map(x=>x.id);
-      if(ids.length) await db.from('players').update({pending:ev==='discard'?'discard':'discard_draw'}).in('id',ids);
-    }
+    const {data}=await db.from('players').select().eq('room_id',room.id), ps=(data||[]).filter(x=>!x.kicked);
+    const ev=pickEvent(ps), info=await runEvent(ev,ps);
+    Object.assign(u,{event:ev,event_key:Math.random().toString(36).slice(2,9),event_round:tc/n+1,event_info:info});
+    evMsg=`${EVENTS[ev].icon} Event: ${EVENTS[ev].title}${info?' — '+info:''}`;
   }
-  const {error}=await db.from('rooms').update(u).eq('id',room.id); if(error) throw error;
+  // เงื่อนไข turn_count กันสองเครื่องเลื่อนเทิร์นซ้อนกัน
+  const {data:ok,error}=await db.from('rooms').update(u).eq('id',room.id).eq('turn_count',room.turn_count||0).select('id');
+  if(error) throw error;
+  if(!ok?.length) return false;
+  if(evMsg) logEv('event',evMsg);
+  return true;
 };
 
+/* ---------- effects: shake / fly / score ---------- */
+function shake(){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const kf=[{transform:'translate(0,0)'},{transform:'translate(-9px,3px)'},{transform:'translate(8px,-4px)'},{transform:'translate(-6px,-3px)'},{transform:'translate(5px,4px)'},{transform:'translate(-3px,1px)'},{transform:'translate(0,0)'}];
+  [...$('#app').children].forEach(c=>{if(!c.classList.contains('fixed')) c.animate(kf,{duration:520})});
+  const f=document.createElement('div');f.className='flash';document.body.appendChild(f);
+  f.animate([{opacity:0},{opacity:1},{opacity:0}],{duration:700}).onfinish=()=>f.remove();
+}
+function runFx(){
+  while(fx.length){
+    const f=fx.shift();
+    if(f.t==='fly'){
+      const src=document.querySelector(f.from||'.abtn.draw'), tgt=document.querySelector(`[data-k="${f.k}"]`);
+      if(!src||!tgt) continue;
+      const sr=src.getBoundingClientRect(), tr=tgt.getBoundingClientRect();
+      const g=document.createElement('div'); g.className='flyc'; g.textContent=ING[f.k].e;
+      g.style.cssText=`left:${sr.left+sr.width/2-28}px;top:${sr.top}px`; document.body.appendChild(g);
+      const dx=tr.left+tr.width/2-(sr.left+sr.width/2), dy=tr.top+tr.height/2-sr.top-39;
+      g.animate([{transform:'translate(0,0) scale(.6) rotate(-15deg)',opacity:0},{transform:'translate(0,-40px) scale(1.15) rotate(8deg)',opacity:1,offset:.3},{transform:`translate(${dx}px,${dy}px) scale(.8) rotate(0deg)`,opacity:1}],{duration:700,easing:'cubic-bezier(.5,0,.3,1)'}).onfinish=()=>g.remove();
+      tgt.animate([{transform:'scale(1)'},{transform:'scale(1.18) translateY(-8px)'},{transform:'scale(1)'}],{duration:420,delay:620});
+    }
+    if(f.t==='score'){
+      const ps=document.querySelectorAll('#mepips .pip.on'), el=ps[ps.length-1]; if(!el) continue;
+      el.animate([{transform:'scale(.2) rotate(-40deg)'},{transform:'scale(1.9) rotate(10deg)'},{transform:'scale(1)'}],{duration:700,easing:'cubic-bezier(.2,1.6,.4,1)'});
+      const r=el.getBoundingClientRect(), t=document.createElement('div'); t.className='plus1'; t.textContent='+1 🍺';
+      t.style.cssText=`left:${r.left}px;top:${r.top-6}px`; document.body.appendChild(t);
+      t.animate([{transform:'translateY(0)',opacity:1},{transform:'translateY(-60px)',opacity:0}],{duration:1100,easing:'ease-out'}).onfinish=()=>t.remove();
+    }
+  }
+}
+
+/* ---------- turn timer / host tools ---------- */
+function tickTimer(){
+  if(!room||room.status!=='playing'||!room.turn_deadline) return;
+  const paused=anyPending(), left=Math.ceil((room.turn_deadline-Date.now())/1000);
+  const bar=$('#tbar'), txt=$('#ttxt');
+  if(bar){bar.style.width=(paused?100:Math.max(0,Math.min(100,left/TURN_SECS*100)))+'%';bar.parentElement.parentElement.classList.toggle('low',!paused&&left<=10)}
+  if(txt) txt.textContent=paused?'⏸ รอเลือกการ์ด':`⏱️ ${Math.max(left,0)} วิ`;
+  if(paused) return;
+  if(myTurn()&&left<=5&&left>0&&left!==lastTick){lastTick=left;Music.sfx('tick')}
+  if(left<=0) enforce();
+}
+setInterval(tickTimer,250);
+function enforce(){
+  const cur=current(); if(!cur||anyPending()) return;
+  const over=Date.now()-room.turn_deadline;
+  if(cur.id===me.id||over>=5000+(mine().seat||0)*1500) autoDraw(cur); // คนอื่นช่วยเดินให้ถ้าเจ้าของเทิร์นหลุด (หน่วงตามลำดับที่นั่ง กันชนกัน)
+}
+async function autoDraw(target){
+  if(busy||autoBusy||autoFor===room.turn_count) return; autoBusy=true; autoFor=room.turn_count;
+  try{
+    const {data:r}=await db.from('rooms').select('turn_count,status').eq('id',room.id).single();
+    if(!r||r.status!=='playing'||r.turn_count!==room.turn_count) return;
+    const {data:t}=await db.from('players').select().eq('id',target.id).single(); if(!t) return;
+    const pool=evActive('hopsshort')?KEYS.filter(x=>x!=='hops'):KEYS, k=rnd(pool);
+    await db.from('players').update({[k]:t[k]+1}).eq('id',t.id);
+    tradeOpen=false; extraOpen=false;
+    await logEv('timeout',`⏱️ หมดเวลา! ระบบจั่ว ${ING[k].e} ให้ ${t.name}`);
+    await setTurn();
+  }catch(e){}finally{autoBusy=false;await load();render()}
+}
+async function skipTurn(){
+  if(!isHost()||anyPending()||busy) return; const cur=current(); if(!cur||cur.id===me.id) return; busy=true;
+  try{const ok=await setTurn(); if(ok) await logEv('skip',`⏭️ โฮสต์ข้ามเทิร์นของ ${cur.name}`)}catch(e){toast('ผิดพลาด: '+e.message)}
+  busy=false; await load(); render();
+}
+async function forceResolve(){
+  if(!isHost()) return;
+  const {data}=await db.from('players').select().eq('room_id',room.id);
+  for(const x of (data||[]).filter(y=>y.pending&&!y.kicked)){
+    const c=hand(x), take=()=>{const k=randCard(c);if(k)c[k]--};
+    take(); if(x.pending==='discard_draw') c[rnd(KEYS)]++;
+    if(x.pending==='trim') while(tot(c)>5) take();
+    await db.from('players').update({...c,pending:null}).eq('id',x.id);
+  }
+  await db.from('rooms').update({turn_deadline:Date.now()+TURN_SECS*1000}).eq('id',room.id);
+  await logEv('skip','🎲 โฮสต์บังคับทิ้งสุ่มให้ผู้เล่นที่ยังไม่เลือก');
+  await load(); render();
+}
+function kickClick(id){
+  if(kickArm===id){kickArm=null;kickPlayer(id)}
+  else{kickArm=id;render();setTimeout(()=>{if(kickArm===id){kickArm=null;render()}},3000)}
+}
+async function kickPlayer(id){
+  if(!isHost()||id===me.id) return;
+  const s=sorted(), n=s.length, idx=s.findIndex(x=>x.id===id); if(idx<0) return;
+  const t=s[idx];
+  const {error}=await db.from('players').update({kicked:true,pending:null}).eq('id',id); if(error) return toast('ผิดพลาด: '+error.message);
+  logEv('kick',`🚪 โฮสต์เตะ ${t.name} ออกจากห้อง`);
+  if(room.status==='playing'){
+    const n2=n-1;
+    if(n2<2){const w=s.find(x=>x.id!==id); await db.from('rooms').update({status:'finished',winner_id:w.id}).eq('id',room.id); logEv('win',`🏆 ${w.name} ชนะเกม (เหลือผู้เล่นคนเดียว)`)}
+    else{
+      const ci=room.current_turn%n; let ni=idx<ci?ci-1:ci; if(ni>=n2) ni=0;
+      await db.from('rooms').update({current_turn:ni,turn_count:(curRound()-1)*n2+ni,turn_deadline:Date.now()+TURN_SECS*1000}).eq('id',room.id);
+    }
+  }
+  await load(); render();
+}
+
 function drawCard(){act(async()=>{
-  const k=KEYS[Math.random()*4|0], p=mine();
-  await upd({[k]:p[k]+1}); await setTurn(); toast(`จั่วได้ ${ING[k].e} ${ING[k].th}`);
+  const pool=evActive('hopsshort')?KEYS.filter(x=>x!=='hops'):KEYS, k=rnd(pool), p=mine();
+  await upd({[k]:p[k]+1}); logEv('draw',`${p.name} จั่ว ${ING[k].e}`); fx.push({t:'fly',k}); await setTurn(); toast(`จั่วได้ ${ING[k].e} ${ING[k].th}`);
 })}
 function openTrade(){ if(!myTurn()||evActive('notrade')||anyPending()) return; tradeOpen=true; give={water:0,malt:0,hops:0,yeast:0}; want=null; render() }
 function giveAdj(k,d){
@@ -232,7 +447,7 @@ function giveAdj(k,d){
 function doTrade(){act(async()=>{
   const p=mine(), patch={};
   KEYS.forEach(k=>patch[k]=p[k]-give[k]); patch[want]+=1;
-  await upd(patch); tradeOpen=false; await setTurn();
+  await upd(patch); tradeOpen=false; logEv('trade',`${p.name} แลกเปลี่ยน → ได้ ${ING[want].e}`); fx.push({t:'fly',k:want,from:'.abtn.trade'}); await setTurn();
 })}
 function brewClick(){ if(evActive('extrabrew')){extraOpen=true;extraPick=null;render()} else brew() }
 function brew(extra){act(async()=>{
@@ -243,42 +458,53 @@ function brew(extra){act(async()=>{
     patch[extra]-=1;
   }
   await upd(patch); extraOpen=false;
+  fx.push({t:'score'}); logEv('brew',`${p.name} ปรุงเบียร์! 🍺 (${patch.beer_points}/${WIN})`);
+  if(patch.beer_points>=WIN) logEv('win',`🏆 ${p.name} ชนะเกม!`);
   if(patch.beer_points>=WIN) await db.from('rooms').update({status:'finished',winner_id:me.id}).eq('id',room.id);
   else await setTurn();
 })}
 async function discardPick(k){
   const p=mine(); if(!p.pending||p[k]<1) return;
-  const c={water:p.water,malt:p.malt,hops:p.hops,yeast:p.yeast}; c[k]--;
-  let got=null; if(p.pending==='discard_draw'){got=KEYS[Math.random()*4|0];c[got]++}
-  const {error}=await db.from('players').update({...c,pending:null}).eq('id',me.id);
+  const c=hand(p); c[k]--;
+  let got=null, next=null;
+  if(p.pending==='discard_draw'){got=rnd(KEYS);c[got]++}
+  if(p.pending==='trim'&&tot(c)>5) next='trim';
+  const {error}=await db.from('players').update({...c,pending:next}).eq('id',me.id);
   if(error) return toast('ผิดพลาด: '+error.message);
+  logEv('discard',`${p.name} ทิ้งวัตถุดิบ 1 ใบ`);
+  if(!next){const {data:pd}=await db.from('players').select('pending,kicked').eq('room_id',room.id); if(!(pd||[]).some(x=>x.pending&&!x.kicked)) await db.from('rooms').update({turn_deadline:Date.now()+TURN_SECS*1000}).eq('id',room.id)}
   toast(got?`ทิ้ง ${ING[k].th} · จั่วได้ ${ING[got].e} ${ING[got].th}`:`ทิ้ง ${ING[k].th} แล้ว`);
   await load(); render();
 }
 async function rematch(){
+  await db.from('game_log').delete().eq('room_id',room.id);
   await db.from('players').update({water:0,malt:0,hops:0,yeast:0,beer_points:0,pending:null}).eq('room_id',room.id);
-  await db.from('rooms').update({status:'waiting',current_turn:0,winner_id:null,turn_count:0,event:null,event_key:null,event_round:0}).eq('id',room.id);
+  await db.from('rooms').update({status:'waiting',current_turn:0,winner_id:null,turn_count:0,event:null,event_key:null,event_round:0,event_info:null,turn_deadline:null}).eq('id',room.id);
 }
 
 /* ---------- UI ---------- */
-const AV=['#d6453d','#2f8fe0','#3aa655','#a45bd6'];
+const AV=['#d6453d','#2f8fe0','#3aa655','#a45bd6','#e08a1e','#1fa7a0','#d6479a','#7a8a99'];
 function cardHTML(k,n,mode){
   const i=ING[k], sm=mode==='sm';
   const b1=!sm&&n>=2?'<div class="gcard gback" style="transform:translate(7px,6px) rotate(4deg)"></div>':'';
   const b2=!sm&&n>=4?'<div class="gcard gback" style="transform:translate(-7px,5px) rotate(-4deg)"></div>':'';
-  return `<div class="gwrap ${sm?'sm':''} ${!sm&&n===0?'empty':''}">${b2}${b1}
+  return `<div class="gwrap ${sm?'sm':''} ${!sm&&n===0?'empty':''}" data-k="${k}">${b2}${b1}
     <div class="gcard">${sm?'':`<div class="cnt">${n}</div>`}
       <div class="face bg-gradient-to-b ${i.c}"><div class="gname">${i.th}</div><div class="gicon">${i.e}</div><div class="gkey">${k}</div></div></div></div>`;
 }
-function av(pl){return `<div class="avatar" style="background:${AV[pl.seat%4]}">${esc([...pl.name][0]||'?').toUpperCase()}</div>`}
+function av(pl){return `<div class="avatar ${onlineIds.has(pl.id)?'on':'off'}" style="background:${AV[pl.seat%AV.length]}">${esc([...pl.name][0]||'?').toUpperCase()}</div>`}
 const pips=n=>Array.from({length:WIN},(_,i)=>`<span class="pip ${i<n?'on':''}">🍺</span>`).join('');
 function copyCode(){navigator.clipboard?.writeText(room.code).then(()=>toast('คัดลอกรหัสห้องแล้ว')).catch(()=>{})}
 for(let i=0;i<16;i++){const b=document.createElement('div');b.className='bubble';const z=6+Math.random()*18;b.style.cssText=`left:${Math.random()*100}%;width:${z}px;height:${z}px;animation-duration:${8+Math.random()*10}s;animation-delay:-${Math.random()*14}s`;document.body.appendChild(b)}
 function render(){
   const a=$('#app');
-  if(!room) return a.innerHTML=lobbyHTML();
-  if(room.status==='waiting') return a.innerHTML=waitingHTML();
+  if(!room){a.innerHTML=lobbyHTML();return}
+  if(room.status==='waiting'){logs=[];lastEvKey=undefined;a.innerHTML=waitingHTML();return}
   a.innerHTML=boardHTML();
+  if(lastEvKey===undefined) lastEvKey=room.event_key||null;
+  else if(room.event_key&&room.event_key!==lastEvKey){lastEvKey=room.event_key; if(room.status==='playing'&&BAD.includes(room.event)) shake()}
+  const mt=myTurn(); if(mt&&!wasMine) Music.sfx('turn'); wasMine=mt;
+  runFx(); tickTimer();
 }
 function head(c){return `<div class="text-center ${c?'compact mb-3':'mb-5 pt-2'}"><div class="emblem"><span class="sw">⚔️</span><span class="mg">🍺</span></div><h1 class="logo">BREW &amp; BRAWL</h1><div class="sub">— CRAFT BEER CARD BRAWL —</div></div>`}
 function lobbyHTML(){return head()+`
@@ -297,7 +523,7 @@ function lobbyHTML(){return head()+`
     </div>
     <p class="hint">รวบรวม 💧 น้ำ · 🌾 มอลต์ · 🌿 ฮอปส์ · 🦠 ยีสต์<br>ปรุงเบียร์ให้ครบ ${WIN} แต้ม แล้วเป็นแชมป์ประลอง ⚔️</p>
   </div>`}
-function playerList(){return sorted().map(p=>`<div class="flex items-center gap-3 bg-black/30 rounded-xl px-3 py-2 border border-amber-900">${av(p)}<span class="flex-1 text-left font-bold truncate">${esc(p.name)}${p.id===me.id?' <span class="text-amber-400 text-sm">(คุณ)</span>':''}</span>${p.seat===0?'<span class="tag" style="animation:none">👑 โฮสต์</span>':''}</div>`).join('')}
+function playerList(){return sorted().map(p=>`<div class="flex items-center gap-3 bg-black/30 rounded-xl px-3 py-2 border border-amber-900">${av(p)}<span class="flex-1 text-left font-bold truncate">${esc(p.name)}${p.id===me.id?' <span class="text-amber-400 text-sm">(คุณ)</span>':''}</span>${p.id===sorted()[0]?.id?'<span class="tag" style="animation:none">👑 โฮสต์</span>':isHost()?`<button class="kick" style="position:static" onclick="kickClick('${p.id}')">${kickArm===p.id?'❗ ยืนยัน':'🚪 เตะ'}</button>`:''}</div>`).join('')}
 function waitingHTML(){
   const host=sorted()[0]?.id===me.id;
   return head()+`<div class="wood p-6 max-w-md mx-auto space-y-4 text-center">
@@ -311,12 +537,15 @@ function boardHTML(){
   const s=sorted(), cur=current(), p=mine(), t=myTurn();
   const canBrew=KEYS.every(k=>p[k]>=1), total=KEYS.reduce((a,k)=>a+p[k],0);
   const noTrade=evActive('notrade'), extraNeed=evActive('extrabrew'), canBrewNow=canBrew&&(!extraNeed||total>=5);
-  const evBar=(noTrade||extraNeed)?`<div class="evbar">${EVENTS[room.event].icon} <b>${EVENTS[room.event].title}</b> ${EVENTS[room.event].desc}</div>`:'';
+  const hopsShort=evActive('hopsshort');
+  const timerHTML=room.turn_deadline?`<div class="timer"><div class="tbar"><i id="tbar" style="width:100%"></i></div><span id="ttxt">⏱️ --</span></div>`:'';
+  const hostBar=isHost()?`<div class="hostbar"><span>👑 โฮสต์</span>${cur&&cur.id!==me.id&&!anyPending()?`<button class="chip" onclick="skipTurn()">⏭️ ข้ามเทิร์น ${esc(cur.name)}</button>`:''}${anyPending()?`<button class="chip" onclick="forceResolve()">🎲 บังคับทิ้งสุ่มให้คนที่ยังไม่เลือก</button>`:''}</div>`:'';
+  const evBar=(noTrade||extraNeed||hopsShort)?`<div class="evbar">${EVENTS[room.event].icon} <b>${EVENTS[room.event].title}</b> ${EVENTS[room.event].desc}</div>`:'';
   const showEv=room.status==='playing'&&room.event&&room.event_round===curRound()&&(seenEv!==room.event_key||!!p.pending);
   const winner=players.find(x=>x.id===room.winner_id), host=s[0]?.id===me.id;
   const others=s.filter(x=>x.id!==me.id).map(o=>`<div class="wood p-3 ${cur?.id===o.id?'turn':''}">
     <div class="flex items-center gap-3">${av(o)}<div class="flex-1 min-w-0"><div class="font-bold truncate">${esc(o.name)}</div><div class="pips">${pips(o.beer_points)}</div></div>${cur?.id===o.id?'<span class="tag">⚔️ กำลังเล่น</span>':''}</div>
-    <div class="flex flex-wrap gap-2 mt-2">${KEYS.map(k=>`<span class="chip">${ING[k].e}<b>${o[k]}</b></span>`).join('')}</div></div>`).join('');
+    <div class="flex flex-wrap gap-2 mt-2">${KEYS.map(k=>`<span class="chip">${ING[k].e}<b>${o[k]}</b></span>`).join('')}</div>${isHost()?`<button class="kick" onclick="kickClick('${o.id}')">${kickArm===o.id?'❗ ยืนยันเตะ':'🚪 เตะ'}</button>`:''}</div>`).join('');
   const rec=`<div class="recipe">${KEYS.map(k=>`<span class="rslot ${p[k]>=1?'ok':''}">${ING[k].e}</span>`).join('<i>+</i>')}<i>➜</i><span class="rslot brewout ${canBrewNow?'ok':''}">🍺</span></div>`;
   const dis=ok=>t&&!busy&&!anyPending()&&ok?'':'disabled';
   const confetti=room.status==='finished'?Array.from({length:36},(_,i)=>`<span class="conf" style="left:${Math.random()*100}%;background:${['#ffc43d','#ff6b4a','#6fdc5a','#4cc3e8','#d98cff'][i%5]};animation-delay:${(Math.random()*3).toFixed(2)}s;animation-duration:${(2.5+Math.random()*2).toFixed(2)}s"></span>`).join(''):'';
@@ -326,10 +555,12 @@ function boardHTML(){
     <span class="chip">🔄 รอบ ${curRound()}</span>
     <button class="chip" onclick="leave()">🚪 ออก</button></div>
   <div class="ribbon ${t?'mine':''}">${t?'⚔️ ถึงเทิร์นของคุณ! ลุยเลย!':'⏳ รอ '+esc(cur?.name||'')+' เล่น…'}</div>
+  ${timerHTML}
+  ${hostBar}
   ${evBar}
   ${others?`<div class="grid gap-3 mb-5" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">${others}</div><div class="vs">⚔️ VS ⚔️</div>`:''}
   <div class="wood p-4 ${t?'turn':''}">
-    <div class="flex items-center gap-3 mb-3">${av(p)}<div class="flex-1 min-w-0"><div class="font-bold text-lg truncate">${esc(p.name)}</div><div class="pips">${pips(p.beer_points)}</div></div><div class="text-right text-xs text-amber-200/60">${total} การ์ด</div></div>
+    <div class="flex items-center gap-3 mb-3">${av(p)}<div class="flex-1 min-w-0"><div class="font-bold text-lg truncate">${esc(p.name)}</div><div class="pips" id="mepips">${pips(p.beer_points)}</div></div><div class="text-right text-xs text-amber-200/60">${total} การ์ด</div></div>
     ${rec}
     <div class="hand">${KEYS.map(k=>cardHTML(k,p[k])).join('')}</div>
     <div class="grid grid-cols-3 gap-3 mt-6">
@@ -337,6 +568,7 @@ function boardHTML(){
       <button class="abtn trade" ${dis(total>=2&&!noTrade)} onclick="openTrade()"><span class="ai">${noTrade?'🚫':'🔄'}</span><span class="at">แลกเปลี่ยน</span><span class="as">${noTrade?'ห้ามในรอบนี้':'2 ชิ้น → 1 ชิ้น'}</span></button>
       <button class="abtn brew ${t&&canBrewNow?'ready':''}" ${dis(canBrewNow)} onclick="brewClick()"><span class="ai">🍻</span><span class="at">ปรุงเบียร์</span><span class="as">${extraNeed?'อย่างละ 1 + เพิ่ม 1 ใบ':'อย่างละ 1 → +1 แต้ม'}</span></button>
     </div></div>
+  ${logBox()}
   ${tradeOpen&&t?tradeHTML(p):''}
   ${extraOpen&&t&&extraNeed?extraHTML(p):''}
   ${showEv?eventHTML(p):''}
@@ -352,12 +584,16 @@ function extraHTML(p){
 function eventHTML(p){
   const ev=EVENTS[room.event], pend=p.pending, waitN=players.filter(x=>x.pending&&x.id!==me.id).length;
   let body='';
-  if(pend) body=`<div class="text-sm text-amber-300 mb-3">${pend==='discard_draw'?'เลือกวัตถุดิบที่จะทิ้ง (แล้วจั่วใหม่ 1 ใบ)':'เลือกวัตถุดิบที่จะทิ้ง 1 ใบ'}</div><div class="flex flex-wrap gap-3 justify-center">${KEYS.map(k=>`<button class="pickc" ${p[k]<1?'disabled':''} onclick="discardPick('${k}')">${ING[k].e}<span>${ING[k].th}</span><b>×${p[k]}</b></button>`).join('')}</div>`;
+  if(pend) body=`<div class="text-sm text-amber-300 mb-3">${pend==='discard_draw'?'เลือกวัตถุดิบที่จะทิ้ง (แล้วจั่วใหม่ 1 ใบ)':pend==='trim'?`ต้องทิ้งให้เหลือ 5 ใบ (ทิ้งอีก ${tot(p)-5} ใบ)`:'เลือกวัตถุดิบที่จะทิ้ง 1 ใบ'}</div><div class="flex flex-wrap gap-3 justify-center">${KEYS.map(k=>`<button class="pickc" ${p[k]<1?'disabled':''} onclick="discardPick('${k}')">${ING[k].e}<span>${ING[k].th}</span><b>×${p[k]}</b></button>`).join('')}</div>`;
   else if(waitN>0) body=`<div class="text-amber-300 animate-pulse">⏳ รอผู้เล่นอื่นเลือก… (${waitN} คน)</div>`;
   else body=`<button class="btn w-full" onclick="seenEv='${room.event_key}';render()">รับทราบ ลุยต่อ! ⚔️</button>`;
   return `<div class="fixed inset-0 bg-black/80 flex items-center justify-center z-40 p-4"><div class="wood p-6 text-center max-w-sm w-full">
-    <div class="evicon">${ev.icon}</div><div class="evtag">⚡ SITUATION EVENT · จบรอบที่ ${room.event_round-1}</div>
-    <div class="evtitle">${ev.title}</div><div class="evdesc">${ev.desc}</div>${body}</div></div>`;
+    <div class="evicon">${ev.icon}</div><div class="evtag ${ev.rare?'rare':''}">${ev.rare?'💎 RARE EVENT':'⚡ SITUATION EVENT'} · จบรอบที่ ${room.event_round-1}</div>
+    <div class="evtitle ${ev.rare?'rare-t':''}">${ev.title}</div><div class="evdesc">${ev.desc}</div>${room.event_info?`<div class="evinfo">${esc(room.event_info)}</div>`:''}${body}</div></div>`;
+}
+function logBox(){
+  const l=[...logs].reverse().slice(0,20);
+  return `<div class="logbox"><div class="logh">📜 บันทึกเหตุการณ์</div><div class="logl">${l.length?l.map(x=>`<div class="logi ${esc(x.kind||'')}">${esc(x.msg)}</div>`).join(''):'<div class="logi">ยังไม่มีเหตุการณ์</div>'}</div></div>`;
 }
 function tradeHTML(p){
   const tot=KEYS.reduce((s,k)=>s+give[k],0);
@@ -429,6 +665,21 @@ const Music=(()=>{
     apply();
   });
   btn.textContent=enabled?'🔊':'🔇';
+  // ---- sound effects (ใช้ปุ่ม 🔊/🔇 เดียวกับเพลง) ----
+  function seq(type,list,d,v){const t0=ctx.currentTime+0.01;list.forEach(([f,o])=>tone(type,f,t0+o,d,v))}
+  const SFX={
+    draw:()=>{hat(ctx.currentTime,0.25);seq('square',[[740,.02],[988,.08]],.1,.14)},
+    trade:()=>seq('square',[[523,0],[659,.07],[523,.14],[784,.21]],.09,.13),
+    brew:()=>{seq('square',[[523,0],[659,.08],[784,.16],[1047,.24]],.12,.14);seq('sine',[[2093,.34],[2637,.42]],.45,.18)},
+    event:()=>{hat(ctx.currentTime,.5);seq('sawtooth',[[392,0],[523,.16],[392,.32],[523,.48]],.14,.1);seq('triangle',[[1760,0]],.55,.2)},
+    win:()=>seq('square',[[523,0],[659,.12],[784,.24],[1047,.36],[784,.5],[1047,.62],[1319,.76]],.18,.15),
+    turn:()=>seq('sine',[[988,0],[1319,.1]],.25,.2),
+    discard:()=>seq('triangle',[[330,0],[247,.09],[165,.18]],.14,.25),
+    skip:()=>seq('square',[[660,0],[440,.1]],.12,.12),
+    tick:()=>seq('square',[[1200,0]],.05,.1)
+  };
+  function sfx(n){if(!ctx||!enabled||ctx.state!=='running')return;try{SFX[n]&&SFX[n]()}catch(e){}}
+  return {sfx};
 })();
 
 restore();
