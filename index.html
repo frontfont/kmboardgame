@@ -197,6 +197,15 @@
   .cface.tl{transform:rotateY(180deg)}
   .duelsel{display:flex;flex-direction:column;gap:.2rem;font-size:.95rem;color:#fde7b8}
   .duelres{margin-top:.8rem;font-family:'Mitr',sans-serif;font-size:1.3rem;line-height:1.5;color:#ffc43d;text-shadow:0 2px 0 #5a2f08}
+  .cbwrap{position:fixed;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + 70px);z-index:55;display:flex;justify-content:center;padding:0 .75rem;pointer-events:none}
+  .cbanner{display:flex;align-items:center;gap:.9rem;max-width:26rem;padding:.7rem 1.2rem;border-radius:1.1rem;background:linear-gradient(#4b2c16,#2c180b);border:3px solid #ffd56a;box-shadow:0 10px 0 #1a0d05,0 0 30px #f5b53aaa;color:#fde7b8}
+  .cbanner.rare{border-color:#b98be8;box-shadow:0 10px 0 #1a0d05,0 0 34px #b98be8cc}
+  .cbanner.danger{border-color:#ff6b4a;background:linear-gradient(#6b2418,#3a1210);box-shadow:0 10px 0 #1a0d05,0 0 34px #ff6b4acc}
+  .cbanner .ci{font-size:2.6rem;line-height:1;filter:drop-shadow(0 3px 2px #0007)}
+  .cbanner .ct{font-family:'Mitr',sans-serif;line-height:1.35}
+  .cbanner .ct b{display:block;font-size:1.1rem;color:#ffc43d}
+  .cbanner.danger .ct b{color:#ffb3a0}
+  .cbanner .ct span{font-size:.85rem;color:#e6cfa0}
   @media (prefers-reduced-motion:reduce){.bubble,.mug,.emblem,.turn,.tag,.ready,.conf,.ribbon{animation:none!important}}
 </style>
 </head>
@@ -405,8 +414,8 @@ let logOpen=!matchMedia('(max-width:640px)').matches;
 let logs=[],soundedId=0,lastEvKey,onlineIds=new Set(),kickArm=null,fx=[],wasMine=false,autoBusy=false,autoFor=-1,lastTick=0;
 const BAD=['notrade','discard','extrabrew','discarddraw','moldmalt','hopsshort','brawl','duel','thief','inspector','swapbag'];
 const isHost=()=>!!me&&sorted()[0]?.id===me.id;
-const logEv=(kind,msg)=>db.from('game_log').insert({room_id:room.id,actor:me.id,kind,msg}).then(()=>{},()=>{});
-function onLog(r){Music.sfx({draw:'draw',trade:'trade',brew:'brew',event:'event',win:'win',discard:'discard',skip:'skip',timeout:'skip',kick:'skip',card:'card',duel:'coin'}[r.kind]||'tick')}
+const logEv=(kind,msg,meta)=>db.from('game_log').insert({room_id:room.id,actor:me.id,kind,msg,meta:meta||null}).then(()=>{},()=>{});
+function onLog(r){Music.sfx({draw:'draw',trade:'trade',brew:'brew',event:'event',win:'win',discard:'discard',skip:'skip',timeout:'skip',kick:'skip',card:'card',duel:'coin'}[r.kind]||'tick'); if(r.kind==='card'&&r.meta&&r.meta.card) cardAlert(r.meta)}
 const setTurn=async(patch={})=>{
   const fxl=room.turn_fx||[];
   if(fxl.includes('double')){ // การ์ดเทิร์นซ้อน: ไม่เลื่อนเทิร์น ให้เล่น Action หลักอีกรอบ
@@ -535,6 +544,26 @@ async function kickPlayer(id){
   await load(); render();
 }
 
+/* ---------- แบนเนอร์ประกาศการใช้การ์ด (ทุกคนเห็น) + แจ้งเตือนเหยื่อล้วงกระเป๋า ---------- */
+function showBanner(icon,title,sub,cls){
+  document.querySelectorAll('.cbwrap').forEach(e=>e.remove());
+  const w=document.createElement('div'); w.className='cbwrap';
+  w.innerHTML=`<div class="cbanner ${cls||''}"><span class="ci">${icon}</span><div class="ct"><b>${esc(title)}</b><span>${esc(sub||'')}</span></div></div>`;
+  document.body.appendChild(w);
+  const still=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  w.firstChild.animate(still
+    ?[{opacity:0},{opacity:1,offset:.1},{opacity:1,offset:.88},{opacity:0}]
+    :[{transform:'translateY(-30px) scale(.7)',opacity:0},{transform:'translateY(0) scale(1.06)',opacity:1,offset:.12},{transform:'translateY(0) scale(1)',opacity:1,offset:.2},{transform:'translateY(0) scale(1)',opacity:1,offset:.86},{transform:'translateY(-14px) scale(.96)',opacity:0}],
+    {duration:3200,easing:'ease-out'}).onfinish=()=>w.remove();
+}
+function cardAlert(m){
+  const c=CARDS[m.card]; if(!c) return;
+  if(m.card==='pickpocket'&&m.took&&m.targetId===me?.id){ // เหยื่อ: หน้าจอสั่น + วาบแดง + บอกว่าเสียอะไร
+    shake(); Music.sfx('skip');
+    showBanner(c.icon,`${m.by} ล้วงกระเป๋าคุณ!`,`เสีย ${ING[m.took].e} ${ING[m.took].th} 1 ใบ`,'danger'); return;
+  }
+  showBanner(c.icon,`${m.by} ใช้การ์ด ${c.name}`,m.target?`เป้าหมาย: ${m.target}`:c.desc,c.rare?'rare':'');
+}
 /* ---------- Action Cards ----------
    เพิ่มการ์ดใหม่: เพิ่มรายการใน CARDS
    w = น้ำหนักโอกาสออก (รวมกัน 100 จะอ่านเป็น % ได้เลย) · rare = ป้าย RARE · target = ต้องเลือกผู้เล่นเป้าหมาย (pool กรองเป้าหมาย)
@@ -572,7 +601,7 @@ const CARDS={
       if(!k){toast('กระเป๋าของเป้าหมายว่างเปล่า');return `ล้วงกระเป๋า ${b.name} แต่กระเป๋าว่าง`}
       await Promise.all([setHand(a.id,{[k]:a[k]+1}),setHand(b.id,{[k]:b[k]-1})]);
       toast(`ล้วงกระเป๋า ${b.name} ได้ ${ING[k].e} ${ING[k].th}`);
-      return `ล้วงกระเป๋า ${b.name} ได้ 1 ใบ`;}},
+      return {msg:`ล้วงกระเป๋า ${b.name} ได้ 1 ใบ`,meta:{took:k}};}},
   secret:{icon:'🧪',name:'สูตรลับ',desc:'เทิร์นนี้ปรุงเบียร์ได้แม้ขาดวัตถุดิบ 1 ชนิด',w:7,rare:true,
     can:p=>hasFx('secret')?'ใช้ผลนี้อยู่แล้ว':KEYS.filter(k=>p[k]>=1).length===3?null:'ใช้ได้เมื่อมีวัตถุดิบครบ 3 ชนิด (ขาดอีก 1 ชนิด)',
     use:async()=>{await addFx('secret');return 'เทิร์นนี้ปรุงเบียร์ขาดวัตถุดิบได้ 1 ชนิด'}},
@@ -606,8 +635,9 @@ async function useCard(cid,tid){
     if(error) throw error; if(!ok?.length) return;
     const cards=[...(p.cards||[])]; cards.splice(cards.indexOf(cid),1);
     await db.from('players').update({cards}).eq('id',me.id);
-    const msg=await c.use({p,t:tid?players.find(x=>x.id===tid):null});
-    await logEv('card',`${p.name} ใช้การ์ด ${c.icon} ${c.name}${msg?' — '+msg:''}`);
+    const t=tid?players.find(x=>x.id===tid):null;
+    const r=await c.use({p,t}), msg=r&&typeof r==='object'?r.msg:r;
+    await logEv('card',`${p.name} ใช้การ์ด ${c.icon} ${c.name}${msg?' — '+msg:''}`,{card:cid,by:p.name,target:t?t.name:null,targetId:t?t.id:null,...(r&&typeof r==='object'?r.meta:{})});
   }catch(e){toast('ผิดพลาด: '+e.message)}
   finally{busy=false;await load();render()}
 }
